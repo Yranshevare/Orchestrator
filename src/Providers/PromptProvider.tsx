@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
-import { useKeyboard } from "@opentui/react";
 import { useAgentContext } from "./AgentProvider";
+import { useSettingsContext } from "./SettingsProvider";
 
 type Message = {
     role: "user" | "assistant";
@@ -33,19 +33,37 @@ export default function PromptContext({ children }: { children: React.ReactNode 
     const [messages, setMessages] = useState<Message[]>([]);
 
     const { selectedAgent, agents } = useAgentContext();
+    const { exit } = useSettingsContext();
+
+    // run the respective handler for each command
+    const handleSlashCommand = async (input: string) => {
+        const command = input.trim();
+
+        switch (command) {
+            case "/exit": {
+                exit();
+                return true;
+            }
+            default: {
+                return false;
+            }
+        }
+    };
 
     const handleSubmit = async (input: string) => {
         const trimmedPrompt = input.trim();
 
         if (!trimmedPrompt) return;
 
-        setMessages((prev) => [
-            ...prev,
-            {
-                role: "user",
-                content: trimmedPrompt,
-            },
-        ]);
+        if (trimmedPrompt.startsWith("/")) {
+            const handled = await handleSlashCommand(trimmedPrompt);
+
+            if (handled) {
+                return;
+            }
+        }
+
+        setMessages((prev) => [...prev, { role: "user", content: trimmedPrompt }]);
 
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate agent call
 
@@ -53,7 +71,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             ...prev,
             {
                 role: "assistant",
-                content: `${createDummyResponse(trimmedPrompt)}, agent: ${agents[selectedAgent]?.name}`,
+                content: `${createDummyResponse(trimmedPrompt)}, agent: ${agents[selectedAgent]?.name ?? "No agent selected"}`,
             },
         ]);
     };

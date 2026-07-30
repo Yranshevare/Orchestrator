@@ -1,16 +1,6 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useKeyboard } from "@opentui/react";
-
-type Agent = {
-    name: string;
-    command: string;
-};
-
-const agents: Agent[] = [
-    { name: "GPT-5", command: "gpt" },
-    { name: "Claude", command: "claude" },
-    { name: "Gemini", command: "gemini" },
-];
+import { type Agent, useSettingsContext } from "./SettingsProvider";
 
 type AppContextType = {
     selectedAgent: number;
@@ -25,9 +15,22 @@ const AppContext = createContext<AppContextType | null>(null);
 export default function AgentProvider({ children }: { children: React.ReactNode }) {
     const [selectedAgent, setSelectedAgent] = useState(0);
     const [mode, setMode] = useState<mode>("code");
+    const { settings } = useSettingsContext();
+    const {filteredCommand} = useSettingsContext()
+
+    const agents = settings.agents;
+
+    useEffect(() => {
+        if (agents.length === 0) {
+            setSelectedAgent(0);
+            return;
+        }
+
+        setSelectedAgent((prev) => (prev >= agents.length ? 0 : prev));
+    }, [agents.length]);
 
     const selectNextAgent = () => {
-        setSelectedAgent((prev) => (prev === agents.length - 1 ? 0 : prev + 1));
+        setSelectedAgent((prev) => (prev >= agents.length - 1 ? 0 : prev + 1));
     };
 
     const selectPreviousAgent = () => {
@@ -39,6 +42,8 @@ export default function AgentProvider({ children }: { children: React.ReactNode 
             setMode((prev) => (prev === "code" ? "plan" : "code"));
             return;
         }
+
+        if(filteredCommand.length > 0) return
 
         switch (key.name) {
             case "left":
