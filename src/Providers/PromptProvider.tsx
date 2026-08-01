@@ -45,6 +45,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             const res = await matchingCommand.handler(params);
             return res;
         }
+        return { status: 404, success: false, message: "Command not found" };
     };
 
     const handleSubmit = async (input: string) => {
@@ -55,7 +56,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
         if (trimmedPrompt.startsWith("/")) {
             const handled = await handleSlashCommand(trimmedPrompt);
 
-            if (!handled || !handled.success) {
+            if (!handled || !handled.success || handled.error) {
                 setMessages((prev) => [
                     ...prev,
                     {
@@ -64,7 +65,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
                     },
                     {
                         role: "assistant",
-                        content: `${handled?.message ?? "Command not found"}, agent: ${agents[selectedAgent]?.name ?? "No agent selected"}`,
+                        content: `${handled?.error ?? handled?.message ?? "Command not found"}`,
                     },
                 ]);
                 return;

@@ -1,0 +1,14 @@
+import os from "os";
+import path from "path";
+
+export const GLOBAL_DIR = path.join(os.homedir(), ".orchestrator");
+export const SETTINGS_PATH = path.join(GLOBAL_DIR, "settings.json");
+
+export const PROJECT_DIR = path.join(process.cwd(), ".orchestrator");
+export const PROJECT_CONFIG = path.join(PROJECT_DIR, "config.json");
+
+export const keys = {
+    agents: "agents",
+    cmd: "cmd",
+    when: "when",
+}

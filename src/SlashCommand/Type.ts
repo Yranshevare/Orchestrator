@@ -1,4 +1,4 @@
-type handler = {status: number, success: boolean, message: string, data?: any};
+type handler = {status: number, success: boolean, message: string, data?: any, error?: string};
 
 interface commandType {
     command: string;
