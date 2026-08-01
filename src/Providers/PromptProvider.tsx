@@ -33,7 +33,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
     const [messages, setMessages] = useState<Message[]>([]);
 
     const { selectedAgent, agents } = useAgentContext();
-    const { commands } = useSettingsContext();
+    const { commands, refreshSettings } = useSettingsContext();
 
     // run the respective handler for each command
     const handleSlashCommand = async (input: string) => {
@@ -43,6 +43,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         if (matchingCommand) {
             const res = await matchingCommand.handler(params);
+            refreshSettings();
             return res;
         }
         return { status: 404, success: false, message: "Command not found" };

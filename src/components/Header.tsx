@@ -18,7 +18,7 @@ export function Header() {
             <text attributes={TextAttributes.BOLD} fg={theme.primary}>
                 ⚡ Orchestrator
             </text>
-            <text fg={theme.secondary}>↑↓ Agent: {agents[selectedAgent]?.name}</text>
+            <text fg={theme.secondary}>↑↓ Agent: {agents[selectedAgent]?.name ?? "No agent selected"}</text>
         </box>
     );
 }

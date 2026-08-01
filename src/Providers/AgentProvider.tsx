@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useKeyboard } from "@opentui/react";
-import { type Agent, useSettingsContext } from "./SettingsProvider";
+import { type Agents, useSettingsContext } from "./SettingsProvider";
+import { keys } from "../constant";
 
 type AppContextType = {
     selectedAgent: number;
-    agents: Agent[];
+    agents: { name: string; cmd: string; when: string }[];
     mode: mode;
 };
 
@@ -16,9 +17,14 @@ export default function AgentProvider({ children }: { children: React.ReactNode 
     const [selectedAgent, setSelectedAgent] = useState(0);
     const [mode, setMode] = useState<mode>("code");
     const { settings } = useSettingsContext();
-    const {filteredCommand} = useSettingsContext()
+    const { filteredCommand } = useSettingsContext();
 
-    const agents = settings.agents;
+    const agents = settings.agents
+        ? Object.entries(settings.agents).map(([name, agent]) => ({
+              name,
+              ...agent,
+          }))
+        : [];
 
     useEffect(() => {
         if (agents.length === 0) {
@@ -43,7 +49,7 @@ export default function AgentProvider({ children }: { children: React.ReactNode 
             return;
         }
 
-        if(filteredCommand.length > 0) return
+        if (filteredCommand.length > 0) return;
 
         switch (key.name) {
             case "left":
@@ -58,7 +64,7 @@ export default function AgentProvider({ children }: { children: React.ReactNode 
         }
     });
 
-    const value = useMemo(
+    const value: AppContextType = useMemo(
         () => ({
             selectedAgent,
             agents,
