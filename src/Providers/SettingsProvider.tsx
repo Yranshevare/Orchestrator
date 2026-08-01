@@ -1,9 +1,9 @@
-
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import exit from "../SlashCommand/exit";
+import commands from "../SlashCommand/commands";
+import type { handler } from "../SlashCommand/Type";
 
 export type Agent = {
     name: string;
@@ -24,19 +24,21 @@ type SettingsContextType = {
     deleteAgent: (name: string) => Promise<void>;
     setAgentActive: (isActive: boolean) => Promise<void>;
     refreshSettings: () => Promise<void>;
-    settingList: string[];
-    filteredCommand: string[];
-    handleSlashCommand: (command: string) => void;
-   exit: () => void 
+    commands: { command: string; description: string; handler: (params: string[]) => Promise<handler> }[];
+    filteredCommand: { command: string; description: string }[];
+    filterSlashCommand: (command: string) => void;
 };
 
-const settingList = ["/model", "/agents", "/agent add", "/agent update", "/agent delete", "/exit"];
+// const settingList = ["/model", "/agents", "/agent add", "/agent update", "/agent delete", "/exit"];
 
 const SettingsContext = createContext<SettingsContextType | null>(null);
 
 const DEFAULT_SETTINGS: SettingsState = {
     model: "",
-    agents: [{name:"abc", command:"abc"}, {name:"efg", command:"efg"}],
+    agents: [
+        { name: "abc", command: "abc" },
+        { name: "efg", command: "efg" },
+    ],
 };
 
 const settingsPath = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "settings.json");
@@ -49,7 +51,9 @@ async function readSettingsFromDisk(): Promise<SettingsState> {
         return {
             model: typeof parsed.model === "string" ? parsed.model : DEFAULT_SETTINGS.model,
             agents: Array.isArray(parsed.agents)
-                ? parsed.agents.filter((agent): agent is Agent => Boolean(agent && typeof agent.name === "string" && typeof agent.command === "string"))
+                ? parsed.agents.filter((agent): agent is Agent =>
+                      Boolean(agent && typeof agent.name === "string" && typeof agent.command === "string")
+                  )
                 : DEFAULT_SETTINGS.agents,
         };
     } catch {
@@ -65,15 +69,23 @@ async function writeSettingsToDisk(settings: SettingsState) {
 export default function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [settings, setSettings] = useState<SettingsState>(DEFAULT_SETTINGS);
     const [isReady, setIsReady] = useState(false);
-    const [filteredCommand, setFilteredCommand] = useState<string[]>([]);
+    const [filteredCommand, setFilteredCommand] = useState<{ command: string; description: string }[]>([]);
 
     // takes user input and return list of matching commands
-    const handleSlashCommand = (command: string) => {
+    const filterSlashCommand = (command: string) => {
         if (!command.startsWith("/")) {
             setFilteredCommand([]);
             return;
         }
-        const commandList = settingList.filter((option) => option.toLowerCase().startsWith(command.toLowerCase()));
+        const commandList = commands.reduce((acc: { command: string; description: string }[], option) => {
+            if (option.command.toLowerCase().startsWith(command.toLowerCase())) {
+                acc.push({
+                    command: option.command,
+                    description: option.description,
+                });
+            }
+            return acc;
+        }, []);
         setFilteredCommand(commandList);
     };
 
@@ -82,8 +94,6 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
         setSettings(nextSettings);
         setIsReady(true);
     };
-
-    
 
     useEffect(() => {
         void refreshSettings();
@@ -127,9 +137,7 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
         const nextSettings = {
             ...settings,
             agents: settings.agents.map((agent) =>
-                agent.name.toLowerCase() === normalizedExistingName.toLowerCase()
-                    ? { name: normalizedNewName, command: normalizedNewCommand }
-                    : agent
+                agent.name.toLowerCase() === normalizedExistingName.toLowerCase() ? { name: normalizedNewName, command: normalizedNewCommand } : agent
             ),
         };
 
@@ -165,10 +173,9 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
             deleteAgent,
             setAgentActive,
             refreshSettings,
-            settingList,
-            filteredCommand, 
-            handleSlashCommand,
-            exit
+            commands,
+            filteredCommand,
+            filterSlashCommand,
         }),
         [settings, isReady, filteredCommand]
     );

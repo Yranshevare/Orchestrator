@@ -33,20 +33,17 @@ export default function PromptContext({ children }: { children: React.ReactNode 
     const [messages, setMessages] = useState<Message[]>([]);
 
     const { selectedAgent, agents } = useAgentContext();
-    const { exit } = useSettingsContext();
+    const { commands } = useSettingsContext();
 
     // run the respective handler for each command
     const handleSlashCommand = async (input: string) => {
-        const command = input.trim();
+        const [command, ...params] = input.trim().split(" ");
 
-        switch (command) {
-            case "/exit": {
-                exit();
-                return true;
-            }
-            default: {
-                return false;
-            }
+        const matchingCommand = commands.find((cmd) => cmd.command === command);
+
+        if (matchingCommand) {
+            const res = await matchingCommand.handler(params);
+            return res;
         }
     };
 
@@ -58,9 +55,38 @@ export default function PromptContext({ children }: { children: React.ReactNode 
         if (trimmedPrompt.startsWith("/")) {
             const handled = await handleSlashCommand(trimmedPrompt);
 
-            if (handled) {
+            if (!handled || !handled.success) {
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        role: "user",
+                        content: trimmedPrompt,
+                    },
+                    {
+                        role: "assistant",
+                        content: `${handled?.message ?? "Command not found"}, agent: ${agents[selectedAgent]?.name ?? "No agent selected"}`,
+                    },
+                ]);
                 return;
             }
+
+            if (handled.data) {
+                const { message, ...rest } = handled;
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        role: "user",
+                        content: trimmedPrompt,
+                    },
+                    {
+                        role: "assistant",
+                        content: `${handled.message}\n\n${JSON.stringify(rest, null, 2)}`,
+                    },
+                ]);
+                return;
+            }
+
+            return;
         }
 
         setMessages((prev) => [...prev, { role: "user", content: trimmedPrompt }]);

@@ -7,7 +7,7 @@ import { useKeyboard } from "@opentui/react";
 
 export default function Input() {
     const { handleSubmit } = usePromptContext();
-    const { handleSlashCommand, filteredCommand } = useSettingsContext();
+    const { filterSlashCommand, filteredCommand } = useSettingsContext();
     const [commandIndex, setCommandIndex] = useState<number>(0);
 
     const ref = useRef<TextareaRenderable>(null);
@@ -16,16 +16,16 @@ export default function Input() {
         if (filteredCommand.length > 0) {
             switch (key.name) {
                 case "up":
-                    setCommandIndex((prev) => (prev === null ? 0 : (prev + 1) % filteredCommand.length));
-                    break;
-                case "down":
                     setCommandIndex((prev) => (prev === null ? 0 : (prev - 1 + filteredCommand.length) % filteredCommand.length));
                     break;
+                case "down":
+                    setCommandIndex((prev) => (prev === null ? 0 : (prev + 1 ) % filteredCommand.length));
+                    break;
                 case "tab":
-                    commandIndex !== null && ref.current?.setText(filteredCommand[commandIndex] || "");
+                    commandIndex !== null && ref.current?.setText(filteredCommand[commandIndex]?.command || "");
+                    ref.current?.gotoBufferEnd();
                     break;
             }
-
         }
     });
 
@@ -35,15 +35,17 @@ export default function Input() {
                 <box position="absolute" bottom={3} width="100%">
                     {filteredCommand.map((command, index) => (
                         <box
-                            key={command}
+                            key={command.command}
                             flexDirection="row"
                             paddingLeft={1}
                             justifyContent="flex-start"
+                            gap={5}
                             alignItems="center"
                             backgroundColor={commandIndex === index ? theme.surface : theme.inputBackground}
                             width="100%"
                         >
-                            <text fg={theme.primary}>{command}</text>
+                            <text fg={theme.primary}>{command.command}</text>
+                            {commandIndex === index && <text fg={theme.muted}>{command.description}</text>}
                         </box>
                     ))}
                 </box>
@@ -76,7 +78,7 @@ export default function Input() {
                             },
                         ]}
                         onContentChange={() => {
-                            handleSlashCommand(ref.current?.plainText ?? "");
+                            filterSlashCommand(ref.current?.plainText ?? "");
                         }}
                         placeholder="Enter prompt or use /model /agent /exit"
                         focused
