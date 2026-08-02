@@ -69,7 +69,7 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
     const refreshSettings = async () => {
         const settingsData = await read()
         const parsedSettings = JSON.parse(settingsData.data as string) as SettingsState;
-        console.log("refreshSettings parsedSettings:", parsedSettings);
+        // console.log("refreshSettings parsedSettings:", parsedSettings);
         const settingObj: SettingsState = {
             model: parsedSettings.model || "",
             agents: parsedSettings.agents || {},

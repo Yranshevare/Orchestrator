@@ -32,7 +32,7 @@ export default async function writeIntoSettings({ key, data }: { key: string; da
 
         const res = await write(JSON.stringify(settings, null, 2));
 
-        console.log("writeIntoSettings res:", res);
+        // console.log("writeIntoSettings res:", res);
 
         if (!res.success) {
             return {

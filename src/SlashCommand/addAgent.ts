@@ -50,7 +50,7 @@ async function addAgent(params: string[]): Promise<handler> {
 }
 
 const AddAgentCommand: commandType = {
-    command: "/add-agent",
+    command: "/agent-add",
     description: '/add-agent <name> "<launch-command>" "<when-to-use>"',
     handler: addAgent,
 };
