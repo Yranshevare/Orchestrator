@@ -73,7 +73,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             }
 
             if (handled.data) {
-                const { message, ...rest } = handled;
+                const { message, data, ...rest } = handled;
                 setMessages((prev) => [
                     ...prev,
                     {
@@ -82,7 +82,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
                     },
                     {
                         role: "assistant",
-                        content: `${handled.message}\n\n${JSON.stringify(rest, null, 2)}`,
+                        content: `${handled.message}\n\n${JSON.stringify(data, null, 2)}`,
                     },
                 ]);
                 return;
