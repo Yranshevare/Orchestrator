@@ -4,9 +4,10 @@ import { usePromptContext } from "../Providers/PromptProvider";
 import { useRef, useState } from "react";
 import { useSettingsContext } from "../Providers/SettingsProvider";
 import { useKeyboard } from "@opentui/react";
+import { AnimatedIcon } from "./AnimatedIcon";
 
 export default function Input() {
-    const { handleSubmit } = usePromptContext();
+    const { handleSubmit, thinking } = usePromptContext();
     const { filterSlashCommand, filteredCommand } = useSettingsContext();
     const [commandIndex, setCommandIndex] = useState<number>(0);
 
@@ -19,7 +20,7 @@ export default function Input() {
                     setCommandIndex((prev) => (prev === null ? 0 : (prev - 1 + filteredCommand.length) % filteredCommand.length));
                     break;
                 case "down":
-                    setCommandIndex((prev) => (prev === null ? 0 : (prev + 1 ) % filteredCommand.length));
+                    setCommandIndex((prev) => (prev === null ? 0 : (prev + 1) % filteredCommand.length));
                     break;
                 case "tab":
                     commandIndex !== null && ref.current?.setText(filteredCommand[commandIndex]?.command || "");
@@ -50,6 +51,16 @@ export default function Input() {
                     ))}
                 </box>
             )}
+            {thinking && (
+                <>
+                    <box marginLeft={1} flexDirection="row" gap={1}>
+                        <AnimatedIcon frames={["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]} color={theme.muted}/>
+                        <text fg={theme.muted}>Thinking...</text>
+                    </box>
+                    <box height={1}></box>
+                </>
+            )}
+
             <box
                 flexDirection="row"
                 paddingX={1}

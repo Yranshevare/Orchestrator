@@ -1,5 +1,6 @@
 import { usePromptContext } from "../Providers/PromptProvider";
 import { theme } from "../theme";
+import { AnimatedIcon } from "./AnimatedIcon";
 
 export function ChatPanel() {
     const { messages } = usePromptContext();
@@ -17,6 +18,8 @@ export function ChatPanel() {
                             </text>
                         </box>
                     )}
+
+                    
 
                     {message.role === "assistant" && (
                         <box padding={1} marginLeft={3}>

@@ -3,8 +3,11 @@ import { ChatPanel } from "./components/ChatPanel";
 import { StatusBar } from "./components/StatusBar";
 import Input from "./components/Input";
 import { theme } from "./theme";
+import { useSettingsContext } from "./Providers/SettingsProvider";
+import Model from "./components/model";
 
 export default function App() {
+    const {isModelOpen} = useSettingsContext()
     return (
         <box width="100%" height="100%" flexDirection="column" backgroundColor={theme.background}>
             <Header />
@@ -12,10 +15,15 @@ export default function App() {
             <box flexGrow={1} flexShrink={1} minHeight={0} overflow="hidden">
                 <ChatPanel />
             </box>
+            {isModelOpen && (
+                <Model/>
+            )}
 
-            <box flexShrink={0}>
-                <Input />
-            </box>
+            {!isModelOpen && (
+                <box flexShrink={0}>
+                    <Input />
+                </box>
+            )}
 
             <box flexShrink={0}>
                 <StatusBar />

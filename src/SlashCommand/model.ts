@@ -1,8 +1,10 @@
+import { eventOptions, events } from "../util/event";
 import type { commandType, handler } from "./Type";
 
 async function model(params: string[]):Promise<handler> {
-    console.log("Switching AI model...");
-    return { status: 200, success: true, message: "AI model switched successfully", data: params };
+    events.emit(eventOptions.LLMModel)
+    // console.log("Switching AI model...");
+    return { status: 200, success: true, message: "AI model switched successfully" };
 }
 
 const ModelCommand: commandType = {

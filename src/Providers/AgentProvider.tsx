@@ -9,15 +9,16 @@ type AppContextType = {
     mode: mode;
 };
 
-type mode = "plan" | "code";
+type mode = "Plan" | "Code";
 
 const AppContext = createContext<AppContextType | null>(null);
 
 export default function AgentProvider({ children }: { children: React.ReactNode }) {
     const [selectedAgent, setSelectedAgent] = useState(0);
-    const [mode, setMode] = useState<mode>("code");
+    const [mode, setMode] = useState<mode>("Code");
     const { settings } = useSettingsContext();
     const { filteredCommand } = useSettingsContext();
+    const {isModelOpen} = useSettingsContext()
 
     const agents = settings.agents
         ? Object.entries(settings.agents).map(([name, agent]) => ({
@@ -45,11 +46,11 @@ export default function AgentProvider({ children }: { children: React.ReactNode 
 
     useKeyboard((key) => {
         if (key.name === "tab" && key.shift) {
-            setMode((prev) => (prev === "code" ? "plan" : "code"));
+            setMode((prev) => (prev === "Code" ? "Plan" : "Code"));
             return;
         }
 
-        if (filteredCommand.length > 0) return;
+        if (filteredCommand.length > 0 || isModelOpen) return;
 
         switch (key.name) {
             case "left":

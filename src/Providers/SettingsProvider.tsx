@@ -6,16 +6,25 @@ import commands from "../SlashCommand/commands";
 import type { handler } from "../SlashCommand/Type";
 import { read } from "../util/read";
 import { keys } from "../constant";
+import { eventOptions, events } from "../util/event";
+import { useKeyboard } from "@opentui/react";
+import { write } from "../util/write";
 
 type Agent = {
     cmd: string;
     when: string;
 };
 
-export type Agents = Record<string, Agent>
+export type Agents = Record<string, Agent>;
+
+type model = {
+    provider: string;
+    name: string;
+    api_key: string;
+};
 
 export type SettingsState = {
-    model: string;
+    model: model;
     agents: Agents;
 };
 
@@ -26,27 +35,35 @@ type SettingsContextType = {
     commands: { command: string; description: string; handler: (params: string[]) => Promise<handler> }[];
     filteredCommand: { command: string; description: string }[];
     filterSlashCommand: (command: string) => void;
+    isModelOpen: boolean;
+    setIsModelOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    saveModel: (model: string) => void;
 };
 
 // const settingList = ["/model", "/agents", "/agent add", "/agent update", "/agent delete", "/exit"];
 
 const SettingsContext = createContext<SettingsContextType | null>(null);
 
-
-
 const DEFAULT_SETTINGS: SettingsState = {
-    model: "",
+    model: { provider: "NA", name: "NA", api_key: "NA" },
     agents: {
-        "abc": { cmd: "abc", when: "abc" },
-        "efg": { cmd: "efg", when: "efg" }
-    }
+        NA: { cmd: "NA", when: "NA" },
+    },
 };
-
 
 export default function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [settings, setSettings] = useState<SettingsState>(DEFAULT_SETTINGS);
     const [isReady, setIsReady] = useState(false);
     const [filteredCommand, setFilteredCommand] = useState<{ command: string; description: string }[]>([]);
+    const [isModelOpen, setIsModelOpen] = useState(false);
+
+    events.on(eventOptions.LLMModel, () => {
+        setIsModelOpen(true);
+    });
+
+    useKeyboard((key) => {
+        if (isModelOpen && key.name === "escape") setIsModelOpen(false);
+    });
 
     // takes user input and return list of matching commands
     const filterSlashCommand = (command: string) => {
@@ -67,12 +84,12 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
     };
 
     const refreshSettings = async () => {
-        const settingsData = await read()
+        const settingsData = await read();
         const parsedSettings = JSON.parse(settingsData.data as string) as SettingsState;
-        // console.log("refreshSettings parsedSettings:", parsedSettings);
+        console.log("refreshSettings parsedSettings:", parsedSettings);
         const settingObj: SettingsState = {
-            model: parsedSettings.model || "",
-            agents: parsedSettings.agents || {},
+            model: parsedSettings.model || DEFAULT_SETTINGS.model,
+            agents: parsedSettings.agents || DEFAULT_SETTINGS.agents,
         };
         setSettings(settingObj);
         setIsReady(true);
@@ -80,7 +97,21 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
 
     useEffect(() => {
         void refreshSettings();
-    }, [])
+    }, []);
+
+    const saveModel = async (model: string) => {
+        console.log(model);
+        const updatedSettings = {
+            ...settings,
+            model: {
+                ...settings.model,
+                name: model,
+            },
+        };
+        await write(JSON.stringify(updatedSettings, null, 2));
+        setSettings(updatedSettings);
+        setIsModelOpen(false);
+    };
 
     const value = useMemo<SettingsContextType>(
         () => ({
@@ -90,8 +121,11 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
             commands,
             filteredCommand,
             filterSlashCommand,
+            isModelOpen,
+            setIsModelOpen,
+            saveModel,
         }),
-        [settings, isReady, filteredCommand]
+        [settings, isReady, filteredCommand, isModelOpen]
     );
 
     return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

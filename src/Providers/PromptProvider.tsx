@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 import { useAgentContext } from "./AgentProvider";
 import { useSettingsContext } from "./SettingsProvider";
+import Model from "../components/model";
 
 type Message = {
     role: "user" | "assistant";
@@ -10,6 +11,7 @@ type Message = {
 type AppContextType = {
     messages: Message[];
     handleSubmit: (input: string) => void;
+    thinking: boolean;
 };
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -31,10 +33,11 @@ function createDummyResponse(prompt: string) {
 
 export default function PromptContext({ children }: { children: React.ReactNode }) {
     const [messages, setMessages] = useState<Message[]>([]);
+    const [thinking, setThinking] = useState(false);
 
-    const { selectedAgent, agents } = useAgentContext();
+    const { selectedAgent, agents, mode } = useAgentContext();
     const { commands, refreshSettings } = useSettingsContext();
-
+    const {settings} = useSettingsContext()
     // run the respective handler for each command
     const handleSlashCommand = async (input: string) => {
         const [command, ...params] = input.trim().split(" ");
@@ -50,6 +53,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
     };
 
     const handleSubmit = async (input: string) => {
+        setThinking(true);
         const trimmedPrompt = input.trim();
 
         if (!trimmedPrompt) return;
@@ -99,17 +103,20 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             ...prev,
             {
                 role: "assistant",
-                content: `${createDummyResponse(trimmedPrompt)}, agent: ${agents[selectedAgent]?.name ?? "No agent selected"}`,
+                content: `${createDummyResponse(trimmedPrompt)}, agent: ${agents[selectedAgent]?.name ?? "No agent selected"}, ${mode} mode, model: ${settings.model.name}`,
             },
         ]);
+
+        setThinking(false);
     };
 
     const value = useMemo<AppContextType>(
         () => ({
             messages,
             handleSubmit,
+            thinking,
         }),
-        [messages, handleSubmit]
+        [messages, handleSubmit, thinking]
     );
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
