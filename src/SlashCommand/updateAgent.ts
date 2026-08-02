@@ -56,6 +56,15 @@ async function updateAgent(params: string[]): Promise<handler> {
     }
 
     const settingsString = await read();
+    if (!settingsString.success) {
+        return {
+            status: 500,
+            success: false,
+            message: "agents not found",
+            error: settingsString.error,
+        };
+    }
+
     const settings = JSON.parse(settingsString.data as string);
 
     // Check agent exists
@@ -86,7 +95,16 @@ async function updateAgent(params: string[]): Promise<handler> {
         delete settings.agents[args.key];
     }
 
-    await write(JSON.stringify(settings, null, 2));
+    const res = await write(JSON.stringify(settings, null, 2));
+
+    if (!res.success) {
+        return {
+            status: 500,
+            success: false,
+            message: "Failed to update settings.",
+            error: res.error,
+        };
+    }
 
     return {
         status: 200,

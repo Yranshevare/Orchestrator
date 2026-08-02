@@ -4,7 +4,7 @@ import { SETTINGS_PATH } from "../constant";
 
 export async function read(filePath: string = SETTINGS_PATH) {
     if (!fs.existsSync(filePath)) {
-        return { status: 404, success: false, message: "File does not exist.", error: "File not found" };
+        return { status: 404, success: false, message: "File does not exist.", error: "File not found, path: " + filePath + " try adding some data" };
     }
     try {
         const data = fs.readFileSync(filePath, "utf-8");

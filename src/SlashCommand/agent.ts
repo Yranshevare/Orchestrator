@@ -3,6 +3,14 @@ import type { handler } from "./Type";
 
 async function agent(params: string[]): Promise<handler> {
     const settingsString = await read();
+    if(!settingsString.success) {
+        return {
+            status: 500,
+            success: false,
+            message: "agents not found",
+            error: settingsString.error,
+        };
+    }
 
     const settings = JSON.parse(settingsString.data as string);
 
