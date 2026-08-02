@@ -55,7 +55,7 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
     const [settings, setSettings] = useState<SettingsState>(DEFAULT_SETTINGS);
     const [isReady, setIsReady] = useState(false);
     const [filteredCommand, setFilteredCommand] = useState<{ command: string; description: string }[]>([]);
-    const [isModelOpen, setIsModelOpen] = useState(false);
+    const [isModelOpen, setIsModelOpen] = useState(true);
 
     events.on(eventOptions.LLMModel, () => {
         setIsModelOpen(true);
