@@ -53,7 +53,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
     };
 
     const handleSubmit = async (input: string) => {
-        setThinking(true);
+        
         const trimmedPrompt = input.trim();
 
         if (!trimmedPrompt) return;
@@ -97,6 +97,8 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         setMessages((prev) => [...prev, { role: "user", content: trimmedPrompt }]);
 
+        setThinking(true);
+        
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate agent call
 
         setMessages((prev) => [
