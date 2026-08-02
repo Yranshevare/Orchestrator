@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { theme } from "../theme";
 import { useKeyboard } from "@opentui/react";
 import { useSettingsContext } from "../Providers/SettingsProvider";
@@ -7,44 +7,54 @@ import type { TextareaRenderable } from "@opentui/core";
 const modelList = ["model1", "model2", "model3"];
 
 export default function Model() {
+    const [selectedModel, setSelectedModel] = useState<number | null>(null);
+    const [filteredModels, setFilteredModels] = useState<string[]>(modelList);
+    const [input, setInput] = useState("");
+    const [filterActive, setFilterActive] = useState(true);
+
     const { saveModel, settings } = useSettingsContext();
+
     const currentModel = settings.model.name;
 
     const ref = useRef<TextareaRenderable>(null);
 
-    const [query, setQuery] = useState("");
-    const [selectedModel, setSelectedModel] = useState<number | null>(null);
-
-    const filteredModels = useMemo(() => {
-        return modelList.filter((model) => model.toLowerCase().includes(query.toLowerCase()));
-    }, [query]);
+    useEffect(() => {
+        if (input.trim() === "") setFilteredModels(modelList);
+        if (!filterActive) return;
+        const newModelList = modelList.filter((model) => model.toLowerCase().includes(input.trim().toLowerCase()));
+        if (selectedModel !== null && selectedModel >= newModelList.length) setSelectedModel(newModelList.length - 1);
+        setFilteredModels(newModelList);
+    }, [input]);
 
     useKeyboard((key) => {
         switch (key.name) {
             case "up":
-                if (filteredModels.length === 0) return;
+                setFilterActive(false);
+                setSelectedModel((prev) => {
+                    const next = prev === null ? 0 : (prev - 1 + filteredModels.length) % filteredModels.length;
 
-                setSelectedModel((prev) => (prev === null ? filteredModels.length - 1 : (prev - 1 + filteredModels.length) % filteredModels.length));
+                    ref.current?.setText(filteredModels[next] || "");
+                    ref.current?.gotoBufferEnd();
+
+                    return next;
+                });
                 break;
 
             case "down":
-                if (filteredModels.length === 0) return;
+                setFilterActive(false);
+                setSelectedModel((prev) => {
+                    const next = prev === null ? 0 : (prev + 1) % filteredModels.length;
 
-                setSelectedModel((prev) => (prev === null ? 0 : (prev + 1) % filteredModels.length));
-                break;
+                    ref.current?.setText(filteredModels[next] || "");
+                    ref.current?.gotoBufferEnd();
 
-            default:
-                // User typed something.
-                // Wait until the textarea updates.
-                queueMicrotask(() => {
-                    const value = ref.current?.plainText ?? "";
-
-                    setQuery(value);
-                    setSelectedModel(null);
+                    return next;
                 });
+                break;
+            default:
+                setFilterActive(true);
         }
     });
-
     return (
         <box
             flexShrink={0}
@@ -64,10 +74,11 @@ export default function Model() {
 
                     <textarea
                         ref={ref}
-                        focused
                         placeholder="search model name"
-                        width="100%"
-                        height={1}
+                        onSubmit={() => {
+                            saveModel(ref.current?.plainText ?? "");
+                            ref.current?.setText("");
+                        }}
                         keyBindings={[
                             {
                                 name: "return",
@@ -75,28 +86,19 @@ export default function Model() {
                                 action: "submit",
                             },
                         ]}
-                        onSubmit={() => {
-                            const model = selectedModel !== null ? filteredModels[selectedModel] : (ref.current?.plainText ?? "");
-
-                            if (model) {
-                                saveModel(model);
-                            }
-
-                            ref.current?.setText("");
-                            setQuery("");
-                            setSelectedModel(null);
-                        }}
+                        onContentChange={() => setInput(ref.current?.plainText ?? "")}
+                        focused
+                        width="100%"
+                        height={1}
                     />
                 </box>
-
                 <text height={1} fg={theme.muted}>
                     esc
                 </text>
             </box>
-
             <box width="100%">
                 {filteredModels.map((model, index) => (
-                    <box key={model} width="100%" backgroundColor={index === selectedModel ? theme.selection : theme.surface}>
+                    <box width="100%" key={index} backgroundColor={index === selectedModel ? theme.selection : theme.surface}>
                         <text marginLeft={1} fg={index === selectedModel ? theme.primary : theme.text}>
                             • {model} {model === currentModel && "(current)"}
                         </text>
