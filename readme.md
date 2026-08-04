@@ -23,48 +23,54 @@ To provide a unified orchestration layer for AI-assisted software development, a
 ---
 
 # Project Setup
-1. **make sure you have bun installed**
+### Step 1: Make sure you have bun installed
 
 ```bash
 bun --version
 ```
-if it is not installed then run following command to install it:
+If bun is not installed then run following command to install it:
 ```bash
 powershell -c "irm bun.sh/install.ps1 | iex"    # for windows
 # OR
 curl -fsSL https://bun.sh/install | bash    # for mac or linux
 ```
-> the library `OpenTUI` need some extra configuration in `Node.js`, more precisely `Node.js 26.4+` with `--experimental-ffi` enabled. That's why we are using `bun` as `bun` has its own built-in FFI (`bun:ffi`) 
+> Why Bun?
+>
+> `OpenTUI` is not a pure JavaScript library. It's renderer is written in `Zig` (general-purpose programming language) and accessed through FFI (Foreign Function Interface).
+>
+> While Node.js can run OpenTUI only with **Node.js 26.4+** and `--experimental-ffi`, Bun provides built-in FFI support out of the box, making setup much simpler.
 
-> The key point is that `OpenTUI` is not a pure JavaScript library. The renderer is written in `Zig` and accessed through FFI (Foreign Function Interface).
-
-2. **clone the repo**
+### Step 2: Clone the Repository
 ```bash
 git clone https://github.com/Yranshevare/Orchestrator.git
 
 cd Orchestrator
 ```
-3. **install the dependencies**
+### Step 3: Install Dependencies
 ```bash
 bun install
 ```
-4. **execute the program**
+### Step 4: Run the Project
 ```bash
 bun run dev
 ```
-> this will open up the Terminal UI of our agent
+> This launches the Orchestrator Terminal UI.
 
-### This project also contains an env file, that defines your running environment
+### Development Environment
 
-You can skip adding `.env` file to access the production environments
+The project works without a `.env` file and connects to the **production** environment by default.
 
-To access the development environment
-1. add `.env` file at the root of the project
-2. add following line into that `.env` file
+To use the **development environment**:
+1. Create a `.env` file at the root of the project
+2. Add following line into that `.env` file
 ```js 
 RUNTIME="dev"
 ```
-This gives you access to a developer features like in terminal console for print statements, some under development commands, etc
+This gives you access to:
+| Feature | Description |
+|---------|-------------|
+| Terminal Console (Ctrl + t) | Enables console output for debugging (`console.log`, etc.). |
+| Experimental Commands | Access to commands currently under development. |
 
 
 ---
