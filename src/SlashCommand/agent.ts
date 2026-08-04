@@ -57,7 +57,7 @@ async function agent(params: string[]): Promise<handler> {
 
 const AgentCommand = {
     command: "/agent",
-    description: "Display agent information",
+    description: "Display agent information /agent <name> or /agent",
     handler: agent,
 };
 

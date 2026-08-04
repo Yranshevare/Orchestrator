@@ -6,6 +6,17 @@ import ModelCommand from "./model";
 import type { commandType } from "./Type";
 import UpdateAgentCommand from "./updateAgent";
 
-const commands: commandType[] = [ExitCommand, ModelCommand, AddAgentCommand, UpdateAgentCommand, AgentCommand, DeleteAgentCommand];
+const isDev = process.env.RUNTIME === "dev";
+
+const commandList: commandType[] = [ExitCommand, ModelCommand, AddAgentCommand, UpdateAgentCommand, AgentCommand, DeleteAgentCommand]
+
+const commands: commandType[] = [];
+
+if (isDev) {
+    commands.push(...commandList);
+}else{
+    commands.push(...commandList.filter(cmd => !cmd.isDev));
+}
+
 
 export default commands;

@@ -4,7 +4,7 @@ import { StatusBar } from "./components/StatusBar";
 import Input from "./components/Input";
 import { theme } from "./theme";
 import { useSettingsContext } from "./Providers/SettingsProvider";
-import Model from "./components/model";
+import Model from "./components/Model";
 
 export default function App() {
     const {isModelOpen} = useSettingsContext()

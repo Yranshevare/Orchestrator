@@ -4,6 +4,7 @@ interface commandType {
     command: string;
     description: string;
     handler: (params: string[]) => Promise<handler>;
+    isDev?: boolean
 }
 
 export type{commandType, handler};

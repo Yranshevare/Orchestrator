@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 import { useAgentContext } from "./AgentProvider";
 import { useSettingsContext } from "./SettingsProvider";
-import Model from "../components/model";
 
 type Message = {
     role: "user" | "assistant";
