@@ -36,9 +36,9 @@ curl -fsSL https://bun.sh/install | bash    # for mac or linux
 ```
 > Why Bun?
 >
-> `OpenTUI` is not a pure JavaScript library. It's renderer is written in `Zig` (general-purpose programming language) and accessed through FFI (Foreign Function Interface).
+> `OpenTUI` is not a pure JavaScript library. It's renderer is written in `Zig` (a general-purpose programming language) and accessed through FFI (Foreign Function Interface).
 >
-> While Node.js can run OpenTUI only with **Node.js 26.4+** and `--experimental-ffi`, Bun provides built-in FFI support out of the box, making setup much simpler.
+> While `Node.js` can run `OpenTUI` only with **`Node.js 26.4+`** and `--experimental-ffi`, `Bun` provides built-in FFI support out of the box, making setup much simpler.
 
 ### Step 2: Clone the Repository
 ```bash
@@ -95,4 +95,5 @@ Type `/` in input box to access the list available commands
 | up / down arrow | switch between the agents |
 | Shift + Tab | to change the agents mode |  
 | Ctrl + t | to access the in terminal console (only for development environment) |
-| Enter | to submit  |
+| Enter | submit  |
+| Tab | accept | 

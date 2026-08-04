@@ -1,6 +1,5 @@
 import { usePromptContext } from "../Providers/PromptProvider";
 import { theme } from "../theme";
-import { AnimatedIcon } from "./AnimatedIcon";
 
 export function ChatPanel() {
     const { messages } = usePromptContext();
@@ -8,7 +7,7 @@ export function ChatPanel() {
     if (messages.length === 0) return Logo();
 
     return (
-        <scrollbox focused width="100%" height="100%">
+        <scrollbox stickyScroll stickyStart="bottom" width="100%" height="100%">
             {messages.map((message, i) => (
                 <box key={i} flexDirection="column">
                     {message.role === "user" && (
@@ -18,8 +17,6 @@ export function ChatPanel() {
                             </text>
                         </box>
                     )}
-
-                    
 
                     {message.role === "assistant" && (
                         <box padding={1} marginLeft={3}>

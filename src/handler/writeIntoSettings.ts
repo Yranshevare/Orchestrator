@@ -16,11 +16,12 @@ export default async function writeIntoSettings({ key, data }: { key: string; da
         }
 
         const settings = existingData.success ? JSON.parse(existingData?.data || "{}") : {};
+       
 
         // check if agent already exit or not
         const agentName: string = Object.keys(data)[0] || "";
 
-        if (key === keys.agents && settings[key][agentName]) {
+        if (existingData.success && key === keys.agents && settings[key][agentName]) {
             return {
                 status: 400,
                 success: false,

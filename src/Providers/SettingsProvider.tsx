@@ -85,14 +85,20 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
 
     const refreshSettings = async () => {
         const settingsData = await read();
-        const parsedSettings = JSON.parse(settingsData.data as string) as SettingsState;
-        // console.log("refreshSettings parsedSettings:", parsedSettings);
-        const settingObj: SettingsState = {
-            model: parsedSettings.model || DEFAULT_SETTINGS.model,
-            agents: parsedSettings.agents || DEFAULT_SETTINGS.agents,
-        };
-        setSettings(settingObj);
-        setIsReady(true);
+
+        if (settingsData.success) {
+            const parsedSettings = JSON.parse(settingsData.data as string) as SettingsState;
+            // console.log("refreshSettings parsedSettings:", parsedSettings);
+            const settingObj: SettingsState = {
+                model: parsedSettings.model || DEFAULT_SETTINGS.model,
+                agents: parsedSettings.agents || DEFAULT_SETTINGS.agents,
+            };
+            setSettings(settingObj);
+            setIsReady(true);
+        } else {
+            setSettings(DEFAULT_SETTINGS);
+            setIsReady(true);
+        }
     };
 
     useEffect(() => {

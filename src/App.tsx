@@ -7,7 +7,7 @@ import { useSettingsContext } from "./Providers/SettingsProvider";
 import Model from "./components/Model";
 
 export default function App() {
-    const {isModelOpen} = useSettingsContext()
+    const { isModelOpen } = useSettingsContext();
     return (
         <box width="100%" height="100%" flexDirection="column" backgroundColor={theme.background}>
             <Header />
@@ -15,9 +15,7 @@ export default function App() {
             <box flexGrow={1} flexShrink={1} minHeight={0} overflow="hidden">
                 <ChatPanel />
             </box>
-            {isModelOpen && (
-                <Model/>
-            )}
+            {isModelOpen && <Model />}
 
             {!isModelOpen && (
                 <box flexShrink={0}>
