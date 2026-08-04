@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 import { useAgentContext } from "./AgentProvider";
 import { useSettingsContext } from "./SettingsProvider";
+import AgentRunner from "../Scheduler/AgentRunner";
 
 type Message = {
     role: "user" | "assistant";
@@ -15,20 +16,20 @@ type AppContextType = {
 
 const AppContext = createContext<AppContextType | null>(null);
 
-function createDummyResponse(prompt: string) {
-    const responses = [
-        "That sounds like a solid task. I can help you tackle it step by step.",
-        "Here is a practical approach to get you moving quickly.",
-        "I will draft a simple plan and keep the implementation lightweight.",
-        "This looks doable. I will suggest a focused solution for now.",
-    ];
+// function createDummyResponse(prompt: string) {
+//     const responses = [
+//         "That sounds like a solid task. I can help you tackle it step by step.",
+//         "Here is a practical approach to get you moving quickly.",
+//         "I will draft a simple plan and keep the implementation lightweight.",
+//         "This looks doable. I will suggest a focused solution for now.",
+//     ];
 
-    const randomReply = responses[Math.floor(Math.random() * responses.length)];
+//     const randomReply = responses[Math.floor(Math.random() * responses.length)];
 
-    const trimmedPrompt = prompt.length > 60 ? `${prompt.slice(0, 57)}...` : prompt;
+//     const trimmedPrompt = prompt.length > 60 ? `${prompt.slice(0, 57)}...` : prompt;
 
-    return `${randomReply} You asked: "${trimmedPrompt}"`;
-}
+//     return `${randomReply} You asked: "${trimmedPrompt}"`;
+// }
 
 export default function PromptContext({ children }: { children: React.ReactNode }) {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -36,7 +37,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
     const { selectedAgent, agents, mode } = useAgentContext();
     const { commands, refreshSettings } = useSettingsContext();
-    const {settings} = useSettingsContext()
+    const { settings } = useSettingsContext();
     // run the respective handler for each command
     const handleSlashCommand = async (input: string) => {
         const [command, ...params] = input.trim().split(" ");
@@ -52,10 +53,11 @@ export default function PromptContext({ children }: { children: React.ReactNode 
     };
 
     const handleSubmit = async (input: string) => {
-        
         const trimmedPrompt = input.trim();
 
         if (!trimmedPrompt) return;
+
+        setMessages((prev) => [...prev, { role: "user", content: trimmedPrompt }]);
 
         if (trimmedPrompt.startsWith("/")) {
             const handled = await handleSlashCommand(trimmedPrompt);
@@ -64,12 +66,8 @@ export default function PromptContext({ children }: { children: React.ReactNode 
                 setMessages((prev) => [
                     ...prev,
                     {
-                        role: "user",
-                        content: trimmedPrompt,
-                    },
-                    {
                         role: "assistant",
-                        content: `${handled?.error ?? handled?.message ?? "Command not found"}`,
+                        content: `${handled?.error ?? handled?.message ?? "cannot execute command, something went wrong"}`,
                     },
                 ]);
                 return;
@@ -79,10 +77,6 @@ export default function PromptContext({ children }: { children: React.ReactNode 
                 const { message, data, ...rest } = handled;
                 setMessages((prev) => [
                     ...prev,
-                    {
-                        role: "user",
-                        content: trimmedPrompt,
-                    },
                     {
                         role: "assistant",
                         content: `${handled.message}\n\n${JSON.stringify(data, null, 2)}`,
@@ -94,19 +88,45 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             return;
         }
 
-        setMessages((prev) => [...prev, { role: "user", content: trimmedPrompt }]);
+        if (!agents[selectedAgent]) {
+            setMessages((prev) => [
+                ...prev,
+                {
+                    role: "assistant",
+                    content: "No agent selected",
+                },
+            ]);
+            setThinking(false);
+            return;
+        }
 
         setThinking(true);
-        
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate agent call
 
-        setMessages((prev) => [
-            ...prev,
-            {
-                role: "assistant",
-                content: `${createDummyResponse(trimmedPrompt)}, agent: ${agents[selectedAgent]?.name ?? "No agent selected"}, ${mode} mode, model: ${settings.model.name}`,
-            },
-        ]);
+        let output = "";
+        let isFirst = true;
+
+        for await (const chunk of AgentRunner({
+            agent: agents[selectedAgent],
+            task: trimmedPrompt,
+        })) {
+            output += chunk;
+
+            setMessages((prev) => {
+                const copy = [...prev];
+                if(isFirst) {
+                    isFirst = false;
+                    return [...copy, { role: "assistant", content: output }];
+                }
+
+                const last = copy.at(-1);
+
+                if (!last) return copy;
+
+                last.content = output;
+
+                return copy;
+            });
+        }
 
         setThinking(false);
     };
