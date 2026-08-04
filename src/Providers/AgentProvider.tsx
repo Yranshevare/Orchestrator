@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useKeyboard } from "@opentui/react";
-import { type Agents, useSettingsContext } from "./SettingsProvider";
-import { keys } from "../constant";
+import { useSettingsContext } from "./SettingsProvider";
 
 type AppContextType = {
     selectedAgent: number;

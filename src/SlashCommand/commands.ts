@@ -3,7 +3,7 @@ import AgentCommand from "./agent";
 import DeleteAgentCommand from "./deleteAgent";
 import ExitCommand from "./exit";
 import ModelCommand from "./model";
-import type { commandType } from "./Type";
+import type { commandType, handler } from "../Types/slashCommand";
 import UpdateAgentCommand from "./updateAgent";
 
 const isDev = process.env.RUNTIME === "dev";

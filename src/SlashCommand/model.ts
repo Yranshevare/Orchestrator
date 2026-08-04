@@ -1,5 +1,5 @@
 import { eventOptions, events } from "../util/event";
-import type { commandType, handler } from "./Type";
+import type { commandType, handler } from "../Types/slashCommand";
 
 async function model(params: string[]):Promise<handler> {
     events.emit(eventOptions.LLMModel)

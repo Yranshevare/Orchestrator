@@ -1,7 +1,7 @@
 import { keys } from "../constant";
 import writeIntoSettings from "../handler/writeIntoSettings";
 import { read } from "../util/read";
-import type { commandType, handler } from "./Type";
+import type { commandType, handler } from "../Types/slashCommand";
 
 async function addAgent(params: string[]): Promise<handler> {
     const str = params.join(" ");

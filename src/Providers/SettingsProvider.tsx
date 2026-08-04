@@ -1,32 +1,12 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import commands from "../SlashCommand/commands";
-import type { handler } from "../SlashCommand/Type";
 import { read } from "../util/read";
-import { keys } from "../constant";
 import { eventOptions, events } from "../util/event";
 import { useKeyboard } from "@opentui/react";
 import { write } from "../util/write";
+import type { handler } from "../Types/slashCommand";
+import type { SettingsState } from "../Types/settings";
 
-type Agent = {
-    cmd: string;
-    when: string;
-};
-
-export type Agents = Record<string, Agent>;
-
-type model = {
-    provider: string;
-    name: string;
-    api_key: string;
-};
-
-export type SettingsState = {
-    model: model;
-    agents: Agents;
-};
 
 type SettingsContextType = {
     settings: SettingsState;

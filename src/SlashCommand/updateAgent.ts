@@ -1,7 +1,7 @@
 import parseFlags from "../handler/commandPaser";
 import { read } from "../util/read";
 import { write } from "../util/write";
-import type { commandType, handler } from "./Type";
+import type { commandType, handler } from "../Types/slashCommand";
 
 async function updateAgent(params: string[]): Promise<handler> {
     const [name, ...rest] = params;

@@ -1,5 +1,5 @@
 import { read } from "../util/read";
-import type { handler } from "./Type";
+import type { commandType, handler } from "../Types/slashCommand";
 
 async function agent(params: string[]): Promise<handler> {
     const settingsString = await read();

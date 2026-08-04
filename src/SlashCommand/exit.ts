@@ -1,4 +1,4 @@
-import type { handler } from "./Type";
+import type { commandType, handler } from "../Types/slashCommand";
 
 async function exit(params: string[]): Promise<handler> {
     process.stdout.write("\x1Bc");
