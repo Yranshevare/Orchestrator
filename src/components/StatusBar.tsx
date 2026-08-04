@@ -19,7 +19,7 @@ export function StatusBar() {
                 <text fg={theme.muted} attributes={TextAttributes.BOLD}>{settings.model.name}</text>
             </box>
 
-            <text fg={theme.muted}>Enter ↵ Send • Ctrl+C Exit</text>
+            <text fg={theme.muted}>Enter ↵ Send • /exit Exit</text>
         </box>
     );
 }

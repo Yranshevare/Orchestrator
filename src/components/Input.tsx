@@ -91,7 +91,7 @@ export default function Input() {
                         onContentChange={() => {
                             filterSlashCommand(ref.current?.plainText ?? "");
                         }}
-                        placeholder="Enter prompt or use /model /agent /exit"
+                        placeholder="Enter prompt or use /model /agent"
                         focused
                         width="100%"
                         height={1}
