@@ -1,8 +1,9 @@
 import { usePromptContext } from "../Providers/PromptProvider";
 import { theme } from "../theme";
+import { AnimatedIcon } from "./AnimatedIcon";
 
 export function ChatPanel() {
-    const { messages } = usePromptContext();
+    const { messages, agentResponse } = usePromptContext();
 
     if (messages.length === 0) return Logo();
 
@@ -23,8 +24,17 @@ export function ChatPanel() {
                             <text fg={theme.text}>{message.content}</text>
                         </box>
                     )}
+
                 </box>
             ))}
+            {
+                agentResponse && (
+                    <box padding={1} marginLeft={3} flexDirection="row" gap={1}>
+                        <AnimatedIcon frames={["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]} color={theme.muted}/>
+                        <text fg={theme.text}>{agentResponse}</text>
+                    </box>
+                )
+            }
         </scrollbox>
     );
 }

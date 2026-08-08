@@ -11,33 +11,20 @@ type Message = {
 type AppContextType = {
     messages: Message[];
     handleSubmit: (input: string) => void;
-    status: string | null;
+    agentResponse: string | null;
 };
 
 const AppContext = createContext<AppContextType | null>(null);
 
-// function createDummyResponse(prompt: string) {
-//     const responses = [
-//         "That sounds like a solid task. I can help you tackle it step by step.",
-//         "Here is a practical approach to get you moving quickly.",
-//         "I will draft a simple plan and keep the implementation lightweight.",
-//         "This looks doable. I will suggest a focused solution for now.",
-//     ];
-
-//     const randomReply = responses[Math.floor(Math.random() * responses.length)];
-
-//     const trimmedPrompt = prompt.length > 60 ? `${prompt.slice(0, 57)}...` : prompt;
-
-//     return `${randomReply} You asked: "${trimmedPrompt}"`;
-// }
-
 export default function PromptContext({ children }: { children: React.ReactNode }) {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [status, setStatus] = useState<string | null>(null);
+    // const [status, setStatus] = useState<string | null>(null);
+    const [agentResponse, setAgentResponse] = useState<string | null>(null);
 
     const { selectedAgent, agents, mode } = useAgentContext();
     const { commands, refreshSettings } = useSettingsContext();
-    const { settings } = useSettingsContext();
+    // const { settings } = useSettingsContext();
+    
     // run the respective handler for each command
     const handleSlashCommand = async (input: string) => {
         const [command, ...params] = input.trim().split(" ");
@@ -96,48 +83,33 @@ export default function PromptContext({ children }: { children: React.ReactNode 
                     content: "No agent selected",
                 },
             ]);
-            setStatus(null);
             return;
         }
 
-        setStatus(`running ${agents[selectedAgent].name}...`);
+
+        setAgentResponse(`running ${agents[selectedAgent].name}...`);
 
         let output = "";
-        let isFirst = true;
 
         for await (const chunk of AgentRunner({
             agent: agents[selectedAgent],
             task: trimmedPrompt,
         })) {
             output += chunk;
-
-            setMessages((prev) => {
-                const copy = [...prev];
-                if(isFirst) {
-                    isFirst = false;
-                    return [...copy, { role: "assistant", content: output }];
-                }
-
-                const last = copy.at(-1);
-
-                if (!last) return copy;
-
-                last.content = output;
-
-                return copy;
-            });
+            setAgentResponse(output);
         }
 
-        setStatus(null);
+        setMessages((prev) => [...prev, { role: "assistant", content: output }]);
+        setAgentResponse(null);
     };
 
     const value = useMemo<AppContextType>(
         () => ({
             messages,
             handleSubmit,
-            status,
+            agentResponse,
         }),
-        [messages, handleSubmit, status]
+        [messages, handleSubmit, agentResponse]
     );
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
