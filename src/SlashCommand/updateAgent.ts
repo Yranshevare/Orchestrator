@@ -5,7 +5,11 @@ import type { commandType, handler } from "../Types/slashCommand";
 
 async function updateAgent(params: string[]): Promise<handler> {
     const [name, ...rest] = params;
-    const args = parseFlags(rest);
+    const args = parseFlags(rest, ["--cmd", "--when", "--name"]);
+
+    
+
+
 
     // Validate required agent name
     if (typeof name !== "string" || name.trim() === "") {

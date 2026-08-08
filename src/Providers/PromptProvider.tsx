@@ -11,7 +11,7 @@ type Message = {
 type AppContextType = {
     messages: Message[];
     handleSubmit: (input: string) => void;
-    thinking: boolean;
+    status: string | null;
 };
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -33,7 +33,7 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export default function PromptContext({ children }: { children: React.ReactNode }) {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [thinking, setThinking] = useState(false);
+    const [status, setStatus] = useState<string | null>(null);
 
     const { selectedAgent, agents, mode } = useAgentContext();
     const { commands, refreshSettings } = useSettingsContext();
@@ -96,11 +96,11 @@ export default function PromptContext({ children }: { children: React.ReactNode 
                     content: "No agent selected",
                 },
             ]);
-            setThinking(false);
+            setStatus(null);
             return;
         }
 
-        setThinking(true);
+        setStatus(`running ${agents[selectedAgent].name}...`);
 
         let output = "";
         let isFirst = true;
@@ -128,16 +128,16 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             });
         }
 
-        setThinking(false);
+        setStatus(null);
     };
 
     const value = useMemo<AppContextType>(
         () => ({
             messages,
             handleSubmit,
-            thinking,
+            status,
         }),
-        [messages, handleSubmit, thinking]
+        [messages, handleSubmit, status]
     );
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

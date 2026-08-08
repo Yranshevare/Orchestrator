@@ -7,7 +7,7 @@ import { useKeyboard } from "@opentui/react";
 import { AnimatedIcon } from "./AnimatedIcon";
 
 export default function Input() {
-    const { handleSubmit, thinking } = usePromptContext();
+    const { handleSubmit, status } = usePromptContext();
     const { filterSlashCommand, filteredCommand } = useSettingsContext();
     const [commandIndex, setCommandIndex] = useState<number>(0);
 
@@ -51,11 +51,11 @@ export default function Input() {
                     ))}
                 </box>
             )}
-            {thinking && (
+            {status && (
                 <>
                     <box marginLeft={1} flexDirection="row" gap={1}>
                         <AnimatedIcon frames={["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]} color={theme.muted}/>
-                        <text fg={theme.muted}>Thinking...</text>
+                        <text fg={theme.muted}>{status}</text>
                     </box>
                     <box height={1}></box>
                 </>

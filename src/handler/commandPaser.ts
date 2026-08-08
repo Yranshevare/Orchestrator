@@ -1,16 +1,15 @@
-function parseFlags(params: string[]): Record<string, string> {
+function parseFlags(params: string[], flags: string[]): Record<string, string> {
     const result: Record<string, string> = {};
 
-    let currentFlag: string | null = null;
+    let key: string | null = null;
 
-    for (const token of params) {
-        if (token.startsWith("--")) {
-            currentFlag = token.slice(2);
-            result[currentFlag] = "";
-        } else if (currentFlag) {
-            result[currentFlag] += (result[currentFlag] ? " " : "") + token;
+    params.forEach((arg) => {
+        if (flags.includes(arg)) {
+            key = arg.slice(2);     // remove first two "--" characters 
+        }else if (key) {
+            result[key] ? (result[key] += " " + arg) : (result[key] =  arg);
         }
-    }
+    });
 
     return result;
 }
