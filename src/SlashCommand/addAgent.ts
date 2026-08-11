@@ -25,7 +25,7 @@ async function addAgent(params: string[]): Promise<handler> {
         },
     };
 
-    const res = await writeIntoSettings({ key: keys.agents, data: data });
+    const res = await writeIntoSettings({ data: data });
     // console.log("writeIntoSettings res:", res);
 
     if (!res.success) {

@@ -24,7 +24,7 @@ export default function Model() {
         const newModelList = modelList.filter((model) => model.toLowerCase().includes(input.trim().toLowerCase()));
         if (selectedModel !== null && selectedModel >= newModelList.length) setSelectedModel(newModelList.length - 1);
         setFilteredModels(newModelList);
-    }, [input]);
+    }, [input, selectedModel, filterActive]);
 
     useKeyboard((key) => {
         switch (key.name) {
@@ -55,6 +55,14 @@ export default function Model() {
                 setFilterActive(true);
         }
     });
+
+    function submitModel(input: string) {
+        if (!filteredModels.includes(input)) {
+            return;
+        }
+        saveModel(input);
+        ref.current?.setText("");
+    }
     return (
         <box
             flexShrink={0}
@@ -75,10 +83,7 @@ export default function Model() {
                     <textarea
                         ref={ref}
                         placeholder="search model name"
-                        onSubmit={() => {
-                            saveModel(ref.current?.plainText ?? "");
-                            ref.current?.setText("");
-                        }}
+                        onSubmit={() => submitModel(ref.current?.plainText ?? "")}
                         keyBindings={[
                             {
                                 name: "return",

@@ -2,7 +2,7 @@ import { keys } from "../constant";
 import { read } from "../util/read";
 import { write } from "../util/write";
 
-export default async function writeIntoSettings({ key, data }: { key: string; data: any }) {
+export default async function writeIntoSettings({ data }: { data: any }) {
     try {
         const existingData = await read();
 
@@ -21,7 +21,7 @@ export default async function writeIntoSettings({ key, data }: { key: string; da
         // check if agent already exit or not
         const agentName: string = Object.keys(data)[0] || "";
 
-        if (existingData.success && key === keys.agents && settings[key][agentName]) {
+        if (existingData.success && "agents" in settings && settings.agents[agentName]) {
             return {
                 status: 400,
                 success: false,
@@ -29,7 +29,7 @@ export default async function writeIntoSettings({ key, data }: { key: string; da
             };
         }
 
-        settings[key] = settings[key] ? { ...settings[key], ...data } : { ...data };
+        settings.agents = settings.agents ? { ...settings.agents, ...data } : { ...data };
 
         const res = await write(JSON.stringify(settings, null, 2));
 

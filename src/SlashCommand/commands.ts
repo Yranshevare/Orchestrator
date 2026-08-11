@@ -5,10 +5,11 @@ import ExitCommand from "./exit";
 import ModelCommand from "./model";
 import type { commandType, handler } from "../Types/slashCommand";
 import UpdateAgentCommand from "./updateAgent";
+import providerCommand from "./provider";
 
 const isDev = process.env.RUNTIME === "dev";
 
-const commandList: commandType[] = [ExitCommand, ModelCommand, AddAgentCommand, UpdateAgentCommand, AgentCommand, DeleteAgentCommand]
+const commandList: commandType[] = [ExitCommand, ModelCommand, AddAgentCommand, UpdateAgentCommand, AgentCommand, DeleteAgentCommand, providerCommand]
 
 const commands: commandType[] = [];
 

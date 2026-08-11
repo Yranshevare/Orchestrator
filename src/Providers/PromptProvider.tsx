@@ -24,7 +24,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
     const { selectedAgent, agents, mode } = useAgentContext();
     const { commands, refreshSettings } = useSettingsContext();
     // const { settings } = useSettingsContext();
-    
+
     // run the respective handler for each command
     const handleSlashCommand = async (input: string) => {
         const [command, ...params] = input.trim().split(" ");
@@ -34,7 +34,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
         if (matchingCommand) {
             const res = await matchingCommand.handler(params);
             refreshSettings();
-            return res;
+            return matchingCommand.skipMessage ? { ...res, skipMessage: true } : res;
         }
         return { status: 404, success: false, message: "Command not found" };
     };
@@ -57,6 +57,10 @@ export default function PromptContext({ children }: { children: React.ReactNode 
                         content: `${handled?.error ?? handled?.message ?? "cannot execute command, something went wrong"}`,
                     },
                 ]);
+                return;
+            }
+            if ("skipMessage" in handled && handled.skipMessage) {
+                setMessages((prev) => prev.slice(0, -1));
                 return;
             }
 
@@ -85,7 +89,6 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             ]);
             return;
         }
-
 
         setAgentResponse(`running ${agents[selectedAgent].name}...`);
 

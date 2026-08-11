@@ -5,9 +5,10 @@ import Input from "./components/Input";
 import { theme } from "./theme";
 import { useSettingsContext } from "./Providers/SettingsProvider";
 import Model from "./components/Model";
+import Provider from "./components/Provider";
 
 export default function App() {
-    const { isModelOpen } = useSettingsContext();
+    const { isModelOpen, isProviderOpen } = useSettingsContext();
     return (
         <box width="100%" height="100%" flexDirection="column" backgroundColor={theme.background}>
             <Header />
@@ -17,7 +18,9 @@ export default function App() {
             </box>
             {isModelOpen && <Model />}
 
-            {!isModelOpen && (
+            {isProviderOpen && <Provider />}
+
+            {(!isModelOpen && !isProviderOpen) && (
                 <box flexShrink={0}>
                     <Input />
                 </box>

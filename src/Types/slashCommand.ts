@@ -5,5 +5,6 @@ export type commandType = {
     command: string;
     description: string;
     handler: (params: string[]) => Promise<handler>;
-    isDev?: boolean
+    isDev?: boolean,
+    skipMessage?: boolean
 }
