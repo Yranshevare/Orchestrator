@@ -10,7 +10,6 @@ async function model(params: string[]): Promise<handler> {
     if (settingsString.status === 404 ) return { status: 500, success: false, message: "settings not found", error: "please add provider, and to do that run /provider command" };
 
     const settings = JSON.parse(settingsString.data as string);
-    console.log(settings);
     if (settings.model.provider   === undefined || settings.model.provider === "NA") return { status: 404, success: false, message: "please add provider, and to do that run /provider command" };
     events.emit(eventOptions.LLMModel);
     // console.log("Switching AI model...");
