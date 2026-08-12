@@ -17,7 +17,7 @@ export default function AgentProvider({ children }: { children: React.ReactNode 
     const [mode, setMode] = useState<mode>("Code");
     const { settings } = useSettingsContext();
     const { filteredCommand } = useSettingsContext();
-    const {isModelOpen} = useSettingsContext()
+    const {isModelOpen, isProviderOpen} = useSettingsContext()
 
     const agents = settings.agents
         ? Object.entries(settings.agents).map(([name, agent]) => ({
@@ -49,7 +49,7 @@ export default function AgentProvider({ children }: { children: React.ReactNode 
             return;
         }
 
-        if (filteredCommand.length > 0 || isModelOpen) return;
+        if (filteredCommand.length > 0 || isModelOpen || isProviderOpen) return;
 
         switch (key.name) {
             case "left":
