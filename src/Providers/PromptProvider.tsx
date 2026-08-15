@@ -2,6 +2,7 @@ import React, { createContext, useContext, useMemo, useState } from "react";
 import { useAgentContext } from "./AgentProvider";
 import { useSettingsContext } from "./SettingsProvider";
 import AgentRunner from "../Scheduler/AgentRunner";
+import inject from "../contextEngine/inject";
 
 type Message = {
     role: "user" | "assistant";
@@ -21,8 +22,8 @@ export default function PromptContext({ children }: { children: React.ReactNode 
     // const [status, setStatus] = useState<string | null>(null);
     const [agentResponse, setAgentResponse] = useState<string | null>(null);
 
-    const { selectedAgent, agents, mode } = useAgentContext();
-    const { commands, refreshSettings } = useSettingsContext();
+    const { selectedAgent, agents } = useAgentContext();
+    const { commands, refreshSettings, settings } = useSettingsContext();
     // const { settings } = useSettingsContext();
 
     // run the respective handler for each command
@@ -45,6 +46,8 @@ export default function PromptContext({ children }: { children: React.ReactNode 
         if (!trimmedPrompt) return;
 
         setMessages((prev) => [...prev, { role: "user", content: trimmedPrompt }]);
+
+        await inject(trimmedPrompt, settings.model);
 
         if (trimmedPrompt.startsWith("/")) {
             const handled = await handleSlashCommand(trimmedPrompt);
@@ -76,6 +79,28 @@ export default function PromptContext({ children }: { children: React.ReactNode 
                 return;
             }
 
+            return;
+        }
+
+        if (settings.model.provider === "NA" || settings.model.name === "NA") {
+            setMessages((prev) => [
+                ...prev,
+                {
+                    role: "assistant",
+                    content: "Please add model, and to do that run /model command",
+                },
+            ]);
+            return;
+        }
+
+        if (agents[selectedAgent]?.cmd === "NA" && agents[selectedAgent]?.when === "NA" && agents[selectedAgent]?.name === "NA") {
+            setMessages((prev) => [
+                ...prev,
+                {
+                    role: "assistant",
+                    content: "Please add agent, and to do that run /agent add command",
+                },
+            ]);
             return;
         }
 

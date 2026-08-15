@@ -1,8 +1,10 @@
 import axios from "axios";
+import { ChatOllama } from "@langchain/ollama";
 
 export type ProviderType = {
     name: string;
     listModel: (key: string) => Promise<string[]>;
+    getLLM: (model: string, api_key: string) => ChatOllama;
 };
 
 const provider: Record<string, ProviderType> = {
@@ -14,6 +16,12 @@ const provider: Record<string, ProviderType> = {
 
             return response.data.models.map((model: any) => model.name);
         },
+        getLLM: (model: string, api_key: string) =>
+            new ChatOllama({
+                model: model,
+                temperature: 0,
+                think: false,
+            }),
     },
 
     openAI: {
@@ -28,10 +36,16 @@ const provider: Record<string, ProviderType> = {
 
             return response.data.data.filter((model: any) => model.id.startsWith("gpt-")).map((model: any) => model.id);
         },
+        getLLM: (model: string, api_key: string) =>
+            new ChatOllama({
+                model: model,
+                temperature: 0,
+                think: false,
+            }),
     },
 
     // https://generativelanguage.googleapis.com/v1beta/models?key=YOUR_API_KEY
-    gemini: {
+    Gemini: {
         name: "Gemini",
 
         listModel: async (key: string): Promise<string[]> => {
@@ -41,6 +55,12 @@ const provider: Record<string, ProviderType> = {
                 .filter((model: any) => model.supportedGenerationMethods?.includes("generateContent"))
                 .map((model: any) => model.name.replace("models/", ""));
         },
+        getLLM: (model: string, api_key: string) =>
+            new ChatOllama({
+                model: model,
+                temperature: 0,
+                think: false,
+            }),
     },
 };
 
