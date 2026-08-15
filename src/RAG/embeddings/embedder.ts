@@ -3,7 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
-
+console.log(ai)
 const MODEL = "gemini-embedding-2";
 
 export async function embedText(text: string): Promise<number[]> {
