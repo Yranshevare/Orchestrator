@@ -111,7 +111,7 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
         const updatedSettings:any = {}
 
         updatedSettings.model = {
-            model: "NA",
+            name: "NA",
             provider: provider,
             api_key: apiKey,
         };

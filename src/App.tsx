@@ -6,6 +6,7 @@ import { theme } from "./theme";
 import { useSettingsContext } from "./Providers/SettingsProvider";
 import Model from "./components/Model";
 import Provider from "./components/Provider";
+import contextEngine from "./contextEngine/contextEngine";
 
 export default function App() {
     const { isModelOpen, isProviderOpen } = useSettingsContext();
