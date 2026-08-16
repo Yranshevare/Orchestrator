@@ -3,8 +3,8 @@ import path from "path";
 import { SETTINGS_PATH } from "../constant";
 
 export async function write(data: string, filePath: string = SETTINGS_PATH) {
-    console.log("cwd:", process.cwd());
-    console.log("resolved:", path.resolve(filePath));
+    // console.log("cwd:", process.cwd());
+    // console.log("resolved:", path.resolve(filePath));
     try {
         const dir = path.dirname(filePath);
 

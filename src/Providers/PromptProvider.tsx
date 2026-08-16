@@ -47,8 +47,6 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         setMessages((prev) => [...prev, { role: "user", content: trimmedPrompt }]);
 
-        await inject(trimmedPrompt, settings.model);
-
         if (trimmedPrompt.startsWith("/")) {
             const handled = await handleSlashCommand(trimmedPrompt);
 
@@ -81,6 +79,8 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
             return;
         }
+
+        
 
         if (settings.model.provider === "NA" || settings.model.name === "NA") {
             setMessages((prev) => [
@@ -126,6 +126,12 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             output += chunk;
             setAgentResponse(output);
         }
+
+        await inject(output, settings.model);
+
+        // setMessages((prev) => [...prev, { role: "assistant", content: trimmedPrompt }]);
+
+        // return;
 
         setMessages((prev) => [...prev, { role: "assistant", content: output }]);
         setAgentResponse(null);
