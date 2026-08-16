@@ -80,8 +80,6 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             return;
         }
 
-        
-
         if (settings.model.provider === "NA" || settings.model.name === "NA") {
             setMessages((prev) => [
                 ...prev,
@@ -124,10 +122,12 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             task: trimmedPrompt,
         })) {
             output += chunk;
-            setAgentResponse(output);
+            // setAgentResponse(output);
         }
 
-        await inject(output, settings.model);
+        setAgentResponse("saving the context...");
+
+        await inject(output, settings.model, trimmedPrompt);
 
         // setMessages((prev) => [...prev, { role: "assistant", content: trimmedPrompt }]);
 
