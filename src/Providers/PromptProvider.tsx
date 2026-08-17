@@ -3,6 +3,7 @@ import { useAgentContext } from "./AgentProvider";
 import { useSettingsContext } from "./SettingsProvider";
 import AgentRunner from "../Scheduler/AgentRunner";
 import inject from "../contextEngine/inject";
+import getContext from "../contextEngine/retrieve";
 
 type Message = {
     role: "user" | "assistant";
@@ -113,28 +114,30 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             return;
         }
 
-        setAgentResponse(`running ${agents[selectedAgent].name}...`);
+        await getContext(trimmedPrompt);
 
-        let output = "";
+        // setAgentResponse(`running ${agents[selectedAgent].name}...`);
 
-        for await (const chunk of AgentRunner({
-            agent: agents[selectedAgent],
-            task: trimmedPrompt,
-        })) {
-            output += chunk;
-            // setAgentResponse(output);
-        }
+        // let output = "";
 
-        setAgentResponse("saving the context...");
+        // for await (const chunk of AgentRunner({
+        //     agent: agents[selectedAgent],
+        //     task: trimmedPrompt,
+        // })) {
+        //     output += chunk;
+        //     // setAgentResponse(output);
+        // }
 
-        await inject(output, settings.model, trimmedPrompt);
+        // setAgentResponse("saving the context...");
 
-        // setMessages((prev) => [...prev, { role: "assistant", content: trimmedPrompt }]);
+        // await inject(output, settings.model, trimmedPrompt);
 
-        // return;
+        setMessages((prev) => [...prev, { role: "assistant", content: trimmedPrompt }]);
 
-        setMessages((prev) => [...prev, { role: "assistant", content: output }]);
-        setAgentResponse(null);
+        return;
+
+        // setMessages((prev) => [...prev, { role: "assistant", content: output }]);
+        // setAgentResponse(null);
     };
 
     const value = useMemo<AppContextType>(

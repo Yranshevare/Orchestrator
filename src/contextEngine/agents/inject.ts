@@ -1,4 +1,4 @@
-import { SystemMessage, HumanMessage, AIMessage } from "langchain";
+import { SystemMessage } from "langchain";
 
 const injectAgentSystemMessage = new SystemMessage(`
 You summarize the provided text for later retrieval.
