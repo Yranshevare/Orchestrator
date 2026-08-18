@@ -41,9 +41,10 @@ For agent tasks:
 - You are NOT solving the user's coding task. You are writing instructions TO the coding agent.
 `);
 
-// at the root there is a demo folder in that folder create the js file and write a code to implement the higher order function
-// can you change the code from hello world to hello orchestrator 
-// can you change the code from hello world to a implementation of higher order function
+// test the agent with following prompts
+// 1. at the root there is a demo folder in that folder create the js file and write a code of hello world
+// 2. can you change the code from hello world to hello orchestrator 
+// 3. can you change the code from hello world to a implementation of higher order function
 
 const graphState = new StateSchema({
     messages: MessagesValue,
