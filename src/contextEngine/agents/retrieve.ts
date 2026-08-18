@@ -1,51 +1,49 @@
 import { SystemMessage } from "langchain";
-import { CONTEXT_DB, SESSION_SIZE } from "../../constant";
+import { CONTEXT_DB } from "../../constant";
 import z from "zod";
-import {
-    Annotation,
-    END,
-    MessagesValue,
-    ReducedValue,
-    START,
-    StateGraph,
-    StateSchema,
-    type ConditionalEdgeRouter,
-    type GraphNode,
-} from "@langchain/langgraph";
-import { AIMessage, BaseMessage } from "@langchain/core/messages";
+import { END, MessagesValue, START, StateGraph, StateSchema, type ConditionalEdgeRouter, type GraphNode } from "@langchain/langgraph";
+import { AIMessage } from "@langchain/core/messages";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { Database } from "bun:sqlite";
-import { ToolNode, toolsCondition } from "@langchain/langgraph/prebuilt";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { read } from "../../util/read";
 import LLM from "../LLM";
 
 const retrieveAgentSystemMessage = new SystemMessage(`
-Determine whether additional context is needed to complete the user's task.
+You are a helpful assistant that sits between the user and a coding agent.
 
-You have a compressed summary of the last ${SESSION_SIZE} tasks, with IDs for retrieving their full context.
+You have:
+- a coding agent with no previous context
+- previous task summaries with IDs
+- retrieveViaID to get full previous task context
 
-- If no summery is available, means its the first task.
-- summery is in JSON string format
-- No retrieval if the task can be completed as-is.
-- If the summary is insufficient, retrieve only the relevant previous context using its IDs.
-- Retrieve only the minimum context necessary to complete the task.
-- If no relevant context can be found, return an error indicating that the task cannot be completed due to missing context.
+Decide whether the request is:
+1. A normal question -> answer directly, agent=false
+2. A coding/task request -> create a prompt for the coding agent, agent=true
 
-Return ONLY a self-contained prompt for a coding agent to complete the user's task in a fresh session. Do not include explanations or reasoning.
+Rules:
+- Try to answer simple questions directly.
+- Try to avoid the coding agent when possible.
+- Try not to retrieve previous context unless it is absolutely necessary.
+- If previous context is required, use retrieveViaID with the relevant task ID.
+- If the request is a coding/agent task, construct a prompt containing enough context for the coding agent to complete it.
+- The coding agent has no prior conversation context, so include all relevant information.
+
+Output ONLY valid JSON:
+{
+  "message": "string",
+  "agent": true/false
+}
+
+For agent tasks:
+- make sure the message is a valid prompt that can directly given to agent to complete the task.
+- make sure you not sound like a coding assistant that has solve the task.
+- You are NOT solving the user's coding task. You are writing instructions TO the coding agent.
 `);
-// const retrieveAgentSystemMessage = new SystemMessage(`
-// Determine whether additional context is needed to complete the user's task.
 
-// You have a compressed summary of the last ${SESSION_SIZE} tasks, with IDs for retrieving their full context.
-
-// - No retrieval if the task can be completed as-is.
-// - If the task can be completed using the summary alone, do not retrieve anything.
-// - If the summary is insufficient, retrieve only the relevant previous context using its IDs.
-// - If previous tasks are irrelevant but additional context is required, use RAG search.
-// - Retrieve only the minimum context necessary to complete the task.
-
-// Return ONLY a self-contained prompt for a coding agent to complete the user's task in a fresh session. Do not include explanations or reasoning.
-// `);
+// at the root there is a demo folder in that folder create the js file and write a code to implement the higher order function
+// can you change the code from hello world to hello orchestrator 
+// can you change the code from hello world to a implementation of higher order function
 
 const graphState = new StateSchema({
     messages: MessagesValue,
@@ -90,7 +88,7 @@ const modelWithTools = model.bindTools([retrieveViaID]);
 
 // converting model to a chatNode
 const chatNode: GraphNode<typeof graphState> = async (state) => {
-    console.log("agent thinking...")
+    console.log("agent thinking...");
     const response = await modelWithTools.invoke([retrieveAgentSystemMessage, ...state.messages]);
     return {
         messages: [response],
