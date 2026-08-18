@@ -10,11 +10,11 @@ import { read } from "../../util/read";
 import LLM from "../LLM";
 
 const retrieveAgentSystemMessage = new SystemMessage(`
-You are a helpful assistant that sits between the user and a coding agent.
+You are a helpful hidden assistant (user must not know you exist) that sits between the user and a coding agent.
 
 You have:
 - a coding agent with no previous context
-- previous task summaries with IDs
+- previous task summaries with IDs (is list is empty, then its a first task)
 - retrieveViaID to get full previous task context
 
 Decide whether the request is:
@@ -37,14 +37,19 @@ Output ONLY valid JSON:
 
 For agent tasks:
 - make sure the message is a valid prompt that can directly given to agent to complete the task.
+- if agent task can be completed without any additional context, then return the users task as a prompt.
+- if there is not enough context to complete the agent task then return error message.
 - make sure you not sound like a coding assistant that has solve the task.
 - You are NOT solving the user's coding task. You are writing instructions TO the coding agent.
 `);
 
 // test the agent with following prompts
-// 1. at the root there is a demo folder in that folder create the js file and write a code of hello world
-// 2. can you change the code from hello world to hello orchestrator 
-// 3. can you change the code from hello world to a implementation of higher order function
+// 1. at the root there is a demo folder in that folder create the js file and write a code of hello world (perfect)
+// 2. can you change the code from hello world to hello orchestrator (perfect)
+// 3. can you change the code from hello world to a implementation of higher order function (perfect)
+// 4. can you tell what is this project about and its tech stack (not perfect:- tries to ans from summary)
+// 5. create the node server that handle jwt based authentication (perfect)
+// 6. add delete user endpoint (not perfect:- return the exact task)
 
 const graphState = new StateSchema({
     messages: MessagesValue,
