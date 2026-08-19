@@ -52,12 +52,9 @@ export default function AgentProvider({ children }: { children: React.ReactNode 
         if (filteredCommand.length > 0 || isModelOpen || isProviderOpen) return;
 
         switch (key.name) {
-            case "left":
             case "up":
                 selectPreviousAgent();
                 break;
-
-            case "right":
             case "down":
                 selectNextAgent();
                 break;

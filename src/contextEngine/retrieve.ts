@@ -12,17 +12,17 @@ export default async function getContext(task: string) {
         throw new Error(data.error);
     }
 
-
-    const agentPrompt = await humanMessage.format({task, summary: data.data}); 
+    const agentPrompt = await humanMessage.format({ task, summary: data.data });
 
     const messages = [new HumanMessage(agentPrompt)];
 
     console.log("fetching context...");
-    const res = await retrieveAgent.invoke({messages});
+    const res = await retrieveAgent.invoke({ messages });
 
-    // const JSONgOutput = JSON.stringify(res.messages.at(-1)?.content, null, 2); 
+    // const JSONgOutput = JSON.stringify(res.messages.at(-1)?.content, null, 2);
     const JSONgOutput = JSON.parse(res.messages.at(-1)?.content as string);
     console.log(JSONgOutput.message);
+    return JSONgOutput;
 }
 
 const humanMessage = new PromptTemplate({

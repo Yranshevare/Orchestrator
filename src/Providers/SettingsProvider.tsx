@@ -91,7 +91,7 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
     };
 
     useEffect(() => {
-        void refreshSettings();
+        refreshSettings();
     }, []);
 
     const saveModel = async (model: string) => {
@@ -102,8 +102,12 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
             ...settings.model,
             name: model,
         }
-        await write(JSON.stringify(updatedSettings, null, 2));
-        setSettings(updatedSettings);
+
+        
+        const newSettings = { ...settings, model: updatedSettings.model };
+
+        await write(JSON.stringify(newSettings, null, 2));
+        setSettings(newSettings);
         setIsModelOpen(false);
     };
 
@@ -115,9 +119,12 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
             provider: provider,
             api_key: apiKey,
         };
+
+        const newSettings = { ...settings, model: updatedSettings.model };
+
         
-        await write(JSON.stringify(updatedSettings, null, 2));
-        setSettings(updatedSettings);
+        await write(JSON.stringify(newSettings, null, 2));
+        setSettings(newSettings);
         setIsProviderOpen(false);
     }
 

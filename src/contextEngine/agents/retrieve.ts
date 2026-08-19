@@ -40,7 +40,7 @@ For agent tasks:
 - if agent task can be completed without any additional context, then return the users task as a prompt.
 - if there is not enough context to complete the agent task then return error message.
 - make sure you not sound like a coding assistant that has solve the task.
-- You are NOT solving the user's coding task. You are writing instructions TO the coding agent.
+- You are NOT solving the user's coding task. You are writing a detailed instructions TO the coding agent.
 `);
 
 // test the agent with following prompts
@@ -77,11 +77,13 @@ graph.addNode("toolNode", toolNode);
 // configuring model
 const settingsString = await read();
 
+
 if (!settingsString.success) {
     throw Error(settingsString.error);
 }
 
 const settings = JSON.parse(settingsString.data as string);
+
 
 const model = LLM(settings.model);
 

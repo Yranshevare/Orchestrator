@@ -114,9 +114,16 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             return;
         }
 
-        await getContext(trimmedPrompt);
+        setAgentResponse(`gathering context...`);
 
-        // setAgentResponse(`running ${agents[selectedAgent].name}...`);
+        const res = await getContext(trimmedPrompt);
+        if (!res.agent) {
+            setMessages((prev) => [...prev, { role: "assistant", content: res.message }]);
+            setAgentResponse(null);
+            return;
+        }
+
+        setAgentResponse(`${agents[selectedAgent].name} (${res.message})...`);
 
         // let output = "";
 
@@ -132,12 +139,14 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         // await inject(output, settings.model, trimmedPrompt);
 
-        setMessages((prev) => [...prev, { role: "assistant", content: trimmedPrompt }]);
+        await new Promise(resolve => setTimeout(resolve, 5000));    // this will be agent call
 
-        return;
+        setMessages((prev) => [...prev, { role: "assistant", content: res.message }]);
 
+        
         // setMessages((prev) => [...prev, { role: "assistant", content: output }]);
-        // setAgentResponse(null);
+        setAgentResponse(null);
+        return;
     };
 
     const value = useMemo<AppContextType>(
