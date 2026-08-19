@@ -31,7 +31,7 @@ Rules:
 - if not have enough context to complete the task then return error message with what context you need do not generate the fake context.
 - if users  task is irrelevant to that of previous context then return the users task as a agent prompt.
 
-Output ONLY valid JSON:
+Output ONLY valid JSON string:
 {
   "message": "string",
   "agent": true/false
@@ -61,11 +61,11 @@ const graph = new StateGraph(graphState);
 
 // tool to retrieve agent
 const retrieveViaID = new DynamicStructuredTool({
-    name: "Retrieve via ID",
+    name: "Retrieve_via_ID",
     description: "Retrieves the context of a task by its ID.",
     schema: z.object({ id: z.string() }),
     func: async ({ id }) => {
-        console.log("tool called: retrieveViaID");
+        console.log("tool called: retrieveViaID", id);
         const db = new Database(CONTEXT_DB);
         const context = db.prepare(`SELECT context, users_task FROM contexts WHERE id = ?`).get(id);
         return context;
@@ -98,7 +98,7 @@ const modelWithTools = model.bindTools([retrieveViaID]);
 
 // converting model to a chatNode
 const chatNode: GraphNode<typeof graphState> = async (state) => {
-    // console.log("agent thinking...");
+    console.log("agent thinking...");
     const response = await modelWithTools.invoke([retrieveAgentSystemMessage, ...state.messages]);
     return {
         messages: [response],

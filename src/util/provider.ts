@@ -1,10 +1,11 @@
 import axios from "axios";
 import { ChatOllama } from "@langchain/ollama";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
 export type ProviderType = {
     name: string;
     listModel: (key: string) => Promise<string[]>;
-    getLLM: (model: string, api_key: string) => ChatOllama;
+    getLLM: (model: string, api_key: string) => ChatOllama | ChatGoogleGenerativeAI;
 };
 
 const provider: Record<string, ProviderType> = {
@@ -56,10 +57,10 @@ const provider: Record<string, ProviderType> = {
                 .map((model: any) => model.name.replace("models/", ""));
         },
         getLLM: (model: string, api_key: string) =>
-            new ChatOllama({
+            new ChatGoogleGenerativeAI({
                 model: model,
                 temperature: 0,
-                think: false,
+                apiKey: api_key,
             }),
     },
 };

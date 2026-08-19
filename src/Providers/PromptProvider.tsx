@@ -139,7 +139,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         await inject(output, settings.model, trimmedPrompt);
 
-        await new Promise(resolve => setTimeout(resolve, 5000));    // this will be agent call
+        // await new Promise(resolve => setTimeout(resolve, 5000));    // this will be agent call
 
         // setMessages((prev) => [...prev, { role: "assistant", content: res.message }]);
 
