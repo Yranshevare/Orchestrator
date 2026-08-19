@@ -125,26 +125,26 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         setAgentResponse(`${agents[selectedAgent].name} (${res.message})...`);
 
-        // let output = "";
+        let output = "";
 
-        // for await (const chunk of AgentRunner({
-        //     agent: agents[selectedAgent],
-        //     task: trimmedPrompt,
-        // })) {
-        //     output += chunk;
-        //     // setAgentResponse(output);
-        // }
+        for await (const chunk of AgentRunner({
+            agent: agents[selectedAgent],
+            task: trimmedPrompt,
+        })) {
+            output += chunk;
+            // setAgentResponse(output);
+        }
 
-        // setAgentResponse("saving the context...");
+        setAgentResponse("saving the context...");
 
-        // await inject(output, settings.model, trimmedPrompt);
+        await inject(output, settings.model, trimmedPrompt);
 
         await new Promise(resolve => setTimeout(resolve, 5000));    // this will be agent call
 
-        setMessages((prev) => [...prev, { role: "assistant", content: res.message }]);
+        // setMessages((prev) => [...prev, { role: "assistant", content: res.message }]);
 
         
-        // setMessages((prev) => [...prev, { role: "assistant", content: output }]);
+        setMessages((prev) => [...prev, { role: "assistant", content: output }]);
         setAgentResponse(null);
         return;
     };

@@ -15,6 +15,7 @@ if(process.env.RUNTIME === "dev") {
 export const PROJECT_CONFIG = path.join(PROJECT_DIR, "config.json");
 export const COMPRESSED_JSON = path.join(PROJECT_DIR, "compressed.json");
 export const CONTEXT_DB = path.join(PROJECT_DIR, "context.db");
+export const SESSION_JSON = path.join(PROJECT_DIR, "session.json");
 
 export const keys = {
     agents: "agents",

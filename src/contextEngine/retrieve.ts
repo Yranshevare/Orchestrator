@@ -16,12 +16,12 @@ export default async function getContext(task: string) {
 
     const messages = [new HumanMessage(agentPrompt)];
 
-    console.log("fetching context...");
+    // console.log("fetching context...");
     const res = await retrieveAgent.invoke({ messages });
 
     // const JSONgOutput = JSON.stringify(res.messages.at(-1)?.content, null, 2);
     const JSONgOutput = JSON.parse(res.messages.at(-1)?.content as string);
-    console.log(JSONgOutput.message);
+    console.log(JSONgOutput);
     return JSONgOutput;
 }
 
