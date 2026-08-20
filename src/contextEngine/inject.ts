@@ -33,7 +33,7 @@ async function saveSummary(Id: string, summary: string, task: string) {
     const newData = {
         task_summary: summary,
         task_id: Id,
-        users_task: task,
+        users_ask: task,
     };
 
     const compressed = await read(COMPRESSED_JSON);
