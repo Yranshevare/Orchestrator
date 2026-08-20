@@ -118,7 +118,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         const res = await getContext(trimmedPrompt);
         if (!res.agent) {
-            setMessages((prev) => [...prev, { role: "assistant", content: res.message }]);
+            setMessages((prev) => [...prev, { role: "assistant", content: `Direct answer:\n${res.message}` }]);
             setAgentResponse(null);
             return;
         }
@@ -129,7 +129,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         // for await (const chunk of AgentRunner({
         //     agent: agents[selectedAgent],
-        //     task: trimmedPrompt,
+        //     task: res.message,
         // })) {
         //     output += chunk;
         //     // setAgentResponse(output);
