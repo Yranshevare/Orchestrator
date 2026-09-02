@@ -6,6 +6,7 @@ export type ProviderType = {
     name: string;
     listModel: (key: string) => Promise<string[]>;
     getLLM: (model: string, api_key: string) => ChatOllama | ChatGoogleGenerativeAI;
+    isDev?: boolean;
 };
 
 const provider: Record<string, ProviderType> = {
@@ -43,6 +44,7 @@ const provider: Record<string, ProviderType> = {
                 temperature: 0,
                 think: false,
             }),
+        isDev: true,
     },
 
     // https://generativelanguage.googleapis.com/v1beta/models?key=YOUR_API_KEY
@@ -64,5 +66,15 @@ const provider: Record<string, ProviderType> = {
             }),
     },
 };
+
+if(process.env.RUNTIME !== "dev"){
+    Object.entries(provider).forEach(([key, value]) => {
+        if (value.isDev) {
+            delete provider[key];
+            console.log(value.name);
+        }
+    })
+}
+
 
 export default provider;

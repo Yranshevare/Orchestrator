@@ -11,7 +11,6 @@ const providerCommand = {
     command: "/provider",
     description: "select your LLM provider",
     handler: provider,
-    isDev: true,
     skipMessage: true
 };
 

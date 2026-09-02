@@ -20,7 +20,6 @@ const ModelCommand: commandType = {
     command: "/model",
     description: "Switch the AI model",
     handler: model,
-    isDev: true,
     skipMessage: true
 };
 
