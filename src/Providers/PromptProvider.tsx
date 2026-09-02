@@ -4,6 +4,7 @@ import { useSettingsContext } from "./SettingsProvider";
 import AgentRunner from "../Scheduler/AgentRunner";
 import inject from "../contextEngine/inject";
 import getContext from "../contextEngine/retrieve";
+import { scheduleAgent } from "../Scheduler/scheduler";
 
 type Message = {
     role: "user" | "assistant";
@@ -116,14 +117,23 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         setAgentResponse(`gathering context...`);
 
-        const res = await getContext(trimmedPrompt);
-        if (!res.agent) {
-            setMessages((prev) => [...prev, { role: "assistant", content: `Direct answer:\n${res.message}` }]);
-            setAgentResponse(null);
-            return;
-        }
+        // const res = await getContext(trimmedPrompt);
+        // if (!res.agent) {
+        //     setMessages((prev) => [...prev, { role: "assistant", content: `Direct answer:\n${res.message}` }]);
+        //     setAgentResponse(null);
+        //     return;
+        // }
 
-        setAgentResponse(`${agents[selectedAgent].name} (${res.message})...`);
+        // setAgentResponse(`${agents[selectedAgent].name} (${res.message})...`);
+
+        const agentState = {
+            userPrompt: trimmedPrompt,
+            executionStep: "",
+            goalComplete: false,
+        };
+        await scheduleAgent.invoke(agentState);
+
+        setMessages((prev) => [...prev, { role: "assistant", content: trimmedPrompt }]); 
 
         // let output = "";
 
@@ -139,12 +149,11 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         // await inject(output, settings.model, trimmedPrompt);
 
-        await new Promise(resolve => setTimeout(resolve, 5000));    // this will be agent call
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // this will be agent call
 
-        setMessages((prev) => [...prev, { role: "assistant", content: res.message }]);
+        // setMessages((prev) => [...prev, { role: "assistant", content: res.message }]);   // log the prompt that given to schedular
 
-        
-        // setMessages((prev) => [...prev, { role: "assistant", content: output }]);
+        // setMessages((prev) => [...prev, { role: "assistant", content: output }]);        // log the agent output
         setAgentResponse(null);
         return;
     };

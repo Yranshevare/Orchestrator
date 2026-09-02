@@ -98,7 +98,7 @@ const modelWithTools = model.bindTools([retrieveViaID]);
 
 // converting model to a chatNode
 const chatNode: GraphNode<typeof graphState> = async (state) => {
-    console.log("agent thinking...");
+    // console.log("agent thinking...");
     const response = await modelWithTools.invoke([retrieveAgentSystemMessage, ...state.messages]);
     return {
         messages: [response],
