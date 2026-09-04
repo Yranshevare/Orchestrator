@@ -2,6 +2,7 @@ import { END, START, StateGraph, StateSchema, type GraphNode } from "@langchain/
 import z from "zod";
 import model from "./LLM";
 import { scheduleAgentSystemMessage } from "./prompts";
+import dummyAgentRunner from "./dummyAgentRunner";
 
 const jobState = z.object({
     task: z.string().describe("The specific task that needs to be executed by the agent."),
@@ -39,13 +40,23 @@ const scheduleNode: GraphNode<typeof graphState> = async (state) => {
 graph.addNode("scheduleNode", scheduleNode);
 
 const agentRunner: GraphNode<typeof graphState> = async (state) => {
+    console.log("executing the task...");
+    const res = await dummyAgentRunner(state.executionStep[0]?.task || "");
+
+    console.log(res)
     return state;
 };
 
+graph.addNode("agentRunner", agentRunner);
+
 // @ts-ignore
 graph.addEdge(START, "scheduleNode");
+
 // @ts-ignore
-graph.addEdge("scheduleNode", END);
+graph.addEdge("scheduleNode", "agentRunner");
+
+// @ts-ignore
+graph.addEdge("agentRunner", END);
 
 const scheduleAgent = graph.compile();
 
@@ -59,7 +70,7 @@ Build a todo app with a React frontend, Node.js API, PostgreSQL database, and te
 
 Add user authentication to my application.
 
-Add dark mode to the React application.\
+Add dark mode to the React application.
 
 Fix the bug where users get logged out after refreshing the page.
 
