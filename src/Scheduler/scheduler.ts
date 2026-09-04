@@ -1,84 +1,80 @@
 import { END, START, StateGraph, StateSchema, type GraphNode } from "@langchain/langgraph";
 import z from "zod";
-import { read } from "../util/read";
-import provider from "../util/provider";
-import { SystemMessage } from "langchain";
+import model from "./LLM";
+import { scheduleAgentSystemMessage } from "./prompts";
+
+const jobState = z.object({
+    task: z.string().describe("The specific task that needs to be executed by the agent."),
+    agent: z.string().describe("The name or identifier of the agent responsible for executing the task."),
+});
 
 const graphState = new StateSchema({
     userPrompt: z.string().describe("The user's prompt or request to the system."),
-    executionStep: z.string().describe("task that needed to be executed by the agent"),
+    executionStep: z.array(jobState),
     goalComplete: z.boolean().describe("Indicates whether the overall goal has been completed."),
 });
 
 const graph = new StateGraph(graphState);
 
-// configuring model
-const settingsString = await read();
+const scheduleNode: GraphNode<typeof graphState> = async (state) => {
+    console.log("agent thinking...");
 
-if (!settingsString.success) {
-    throw Error(settingsString.error);
-}
-
-const settings = JSON.parse(settingsString.data as string);
-
-
-const model = provider[settings.model.provider]?.getLLM(settings.model.name, settings.model.api_key);
-
-if (!model) {
-    throw Error("Model not found");
-}
-
-const scheduleAgentSystemMessage = new SystemMessage(`
-    You are a software task orchestrator.
-
-    Your job is to plan the next executable job.
-
-    INPUT:
-    - the users requested prompt
-    - task summary up til now
-
-    OUTPUT (JSON only):
-    {
-        task:string,
-        goalComplete:boolean
+    // to resolve a type error
+    if (!model) {
+        throw Error("Model not found");
     }
 
-    YOUR JOB:
-    - analyze the users prompt and the task summary
-    - determine if the users goal is complete
-    - if the users goal is complete, return goalComplete = true and task = ""
-    - if the users goal is not complete, return goalComplete = false and task = "next_executable_task"
-
-
-    RULES:
-
-    1. Return ONLY the next executable job.
-    2. Stay strictly within the user's requested scope don't try to expand it beyond that.
-    3. if summary is empty that means this is the first task, so return the first executable task.
-    4. return a valid JSON string with only the keys task and goalComplete. Do not include any other keys or values.
-`)
-
-
-const scheduleNode:GraphNode<typeof graphState> = async (state) => {
-    console.log("agent thinking...");
     const response = await model.invoke([scheduleAgentSystemMessage, state.userPrompt]);
+
     const output = JSON.parse(response.content.toString());
-    console.log(output)
+
+    console.log(output);
+
     return {
-        userPrompt: state.userPrompt,
-        executionStep: output.task,
+        executionStep: output.job,
         goalComplete: output.goalComplete,
     };
-}
+};
 
 graph.addNode("scheduleNode", scheduleNode);
 
-// @ts-ignore
-graph .addEdge(START, "scheduleNode");
-// @ts-ignore
-graph .addEdge("scheduleNode", END);
+const agentRunner: GraphNode<typeof graphState> = async (state) => {
+    return state;
+};
 
+// @ts-ignore
+graph.addEdge(START, "scheduleNode");
+// @ts-ignore
+graph.addEdge("scheduleNode", END);
 
 const scheduleAgent = graph.compile();
 
 export { scheduleAgent };
+
+
+/*
+SOME TEST CASES FOR THE SCHEDULER:
+
+Build a todo app with a React frontend, Node.js API, PostgreSQL database, and tests.
+
+Add user authentication to my application.
+
+Add dark mode to the React application.\
+
+Fix the bug where users get logged out after refreshing the page.
+
+Refactor the payment module and add tests without changing its behavior.
+
+Build a REST API for managing products and add integration tests.
+
+Add a profile page where users can view and edit their name and email.
+
+Build a search feature with backend search API, frontend search UI, and tests.
+
+Fix the broken submit button on the registration form.
+
+Add pagination and sorting to the product API.
+
+Containerize the application and set up CI to run tests on every pull request.
+
+*/

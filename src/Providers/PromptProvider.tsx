@@ -127,13 +127,13 @@ export default function PromptContext({ children }: { children: React.ReactNode 
         // setAgentResponse(`${agents[selectedAgent].name} (${res.message})...`);
 
         const agentState = {
-            userPrompt: trimmedPrompt,
-            executionStep: "",
+            userPrompt: `user prompt: ${trimmedPrompt}\navailable agent:${JSON.stringify(agents.map((agent) => ({ name: agent.name, capability: agent.when })))}`,
+            executionStep: [],
             goalComplete: false,
         };
         await scheduleAgent.invoke(agentState);
 
-        setMessages((prev) => [...prev, { role: "assistant", content: trimmedPrompt }]); 
+        setMessages((prev) => [...prev, { role: "assistant", content: trimmedPrompt }]);
 
         // let output = "";
 
