@@ -130,6 +130,8 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             userPrompt: `user prompt: ${trimmedPrompt}\navailable agent:${JSON.stringify(agents.map((agent) => ({ name: agent.name, capability: agent.when })))}`,
             executionStep: [],
             goalComplete: false,
+            executionSummary: "",
+            output: [],
         };
         await scheduleAgent.invoke(agentState);
 
