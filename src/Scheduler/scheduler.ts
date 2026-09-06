@@ -1,8 +1,8 @@
 import { END, START, StateGraph, StateSchema, type ConditionalEdgeRouter, type GraphNode } from "@langchain/langgraph";
 import z from "zod";
-import model from "./LLM";
 import { scheduleAgentSystemMessage, summaryAgentSystemMessage } from "./prompts";
 import dummyAgentRunner from "./dummyAgentRunner";
+import LoadModel from "./LLM";
 
 const jobState = z.object({
     task: z.string().describe("The specific task that needs to be executed by the agent."),
@@ -21,6 +21,8 @@ const graph = new StateGraph(graphState);
 
 const scheduleNode: GraphNode<typeof graphState> = async (state) => {
     console.log("agent thinking...");
+
+    const model = await LoadModel();
 
     // to resolve a type error
     if (!model) {
@@ -62,6 +64,8 @@ graph.addNode("agentRunner", agentRunner);
 
 const summaryNode: GraphNode<typeof graphState> = async (state) => {
     console.log("summarizing the task...");
+
+    const model = await LoadModel();
 
     // to resolve a type error
     if (!model) {
