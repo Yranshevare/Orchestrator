@@ -1,5 +1,5 @@
 import { SystemMessage } from "langchain";
-import model from "./LLM";
+import LoadModel from "./LLM";
 
 const systemPrompt = new SystemMessage(`
 You are a dummy coding agent used for testing a software task orchestrator.
@@ -17,6 +17,7 @@ Do not use a fixed response template.
 `);
 
 export default async function dummyAgentRunner(prompt: string) {
+    const model = await LoadModel();
     if (!model) {
         throw new Error("Model not found");
     }

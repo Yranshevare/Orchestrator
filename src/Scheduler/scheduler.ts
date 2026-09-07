@@ -20,7 +20,7 @@ const graphState = new StateSchema({
 const graph = new StateGraph(graphState);
 
 const scheduleNode: GraphNode<typeof graphState> = async (state) => {
-    console.log("agent thinking...");
+    // console.log("agent thinking...");
 
     const model = await LoadModel();
 
@@ -35,7 +35,14 @@ const scheduleNode: GraphNode<typeof graphState> = async (state) => {
 
     const output = JSON.parse(response.content.toString());
 
-    console.log(output);
+    let str = "";
+    output.job.forEach((job: { task: string; agent: string }) => {
+        str += job.agent + ": " + job.task + "\n";
+        // setAgentResponse(job.agent + ": " + job.task);
+    });
+    // state.setAgentResponse(str);
+
+    // console.log(output);
 
     return {
         executionStep: output.job,
@@ -46,7 +53,8 @@ const scheduleNode: GraphNode<typeof graphState> = async (state) => {
 graph.addNode("scheduleNode", scheduleNode);
 
 const agentRunner: GraphNode<typeof graphState> = async (state) => {
-    console.log("executing the task...");
+    // console.log("executing the task...");
+
     const output: string[] = await Promise.all(
         state.executionStep.map(async (job) => {
             const res = await dummyAgentRunner(job.task);
@@ -54,7 +62,7 @@ const agentRunner: GraphNode<typeof graphState> = async (state) => {
         })
     );
 
-    console.log("complete tasks", output.length);
+    // console.log("complete tasks", output.length);
     return {
         output: output,
     };
@@ -63,7 +71,7 @@ const agentRunner: GraphNode<typeof graphState> = async (state) => {
 graph.addNode("agentRunner", agentRunner);
 
 const summaryNode: GraphNode<typeof graphState> = async (state) => {
-    console.log("summarizing the task...");
+    // console.log("summarizing the task...");
 
     const model = await LoadModel();
 
@@ -75,7 +83,7 @@ const summaryNode: GraphNode<typeof graphState> = async (state) => {
     const prompt = `previous summary: ${state.executionSummary}\nagent output: ${state.output.join("\n")}`;
 
     const response = await model.invoke([summaryAgentSystemMessage, prompt]);
-    console.log(response.content.toString());
+    // console.log(response.content.toString());
     return {
         executionSummary: response.content.toString(),
     };
@@ -111,7 +119,7 @@ const shouldGiveToSummaryAgent: ConditionalEdgeRouter<{ InputSchema: typeof grap
 graph.addEdge(START, "scheduleNode");
 
 // @ts-ignore
-graph.addConditionalEdges("scheduleNode", shouldContinue, ["agentRunner" , END]);
+graph.addConditionalEdges("scheduleNode", shouldContinue, ["agentRunner", END]);
 
 // @ts-ignore
 graph.addConditionalEdges("agentRunner", shouldGiveToSummaryAgent, ["summaryNode", "updateExecutionSummary"]);

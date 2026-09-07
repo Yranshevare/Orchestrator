@@ -133,9 +133,51 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             executionSummary: "",
             output: [],
         };
-        await scheduleAgent.invoke(agentState);
+        // await scheduleAgent.invoke(agentState);
 
-        setMessages((prev) => [...prev, { role: "assistant", content: trimmedPrompt }]);
+        let output = "";
+
+        for await (const chunk of await scheduleAgent.stream(agentState)) {
+            console.log(chunk);
+            //@ts-ignore
+            if (chunk.scheduleNode?.goalComplete) {
+                break;
+            }
+            //@ts-ignore
+            if (chunk.scheduleNode?.executionStep.length > 0) {
+                let str = "";
+                //@ts-ignore
+                chunk.scheduleNode.executionStep.forEach((job: { task: string; agent: string }) => {
+                    str += job.agent + ": " + job.task + "\n\n";
+                    // setAgentResponse(job.agent + ": " + job.task);
+                });
+                setAgentResponse(str);
+            }
+            //@ts-ignore
+            if (chunk.agentRunner?.output.length > 0) {
+                let str = "";
+                //@ts-ignore
+                chunk.agentRunner.output.forEach((job: string) => {
+                    str += job + "\n\n";
+                    // setAgentResponse(job.agent + ": " + job.task);
+                });
+                setAgentResponse(str);
+            }
+
+            //@ts-ignore
+            if (chunk.updateExecutionSummary?.executionSummary) {
+                //@ts-ignore
+                output = chunk.updateExecutionSummary.executionSummary;
+            }
+
+            //@ts-ignore
+            if (chunk.summaryNode?.executionSummary) {
+                //@ts-ignore
+                output = chunk.summaryNode.executionSummary;
+            }
+        }
+
+        setMessages((prev) => [...prev, { role: "assistant", content: output }]);
 
         // let output = "";
 
@@ -151,7 +193,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         // await inject(output, settings.model, trimmedPrompt);
 
-        await new Promise((resolve) => setTimeout(resolve, 5000)); // this will be agent call
+        // await new Promise((resolve) => setTimeout(resolve, 5000)); // this will be agent call
 
         // setMessages((prev) => [...prev, { role: "assistant", content: res.message }]);   // log the prompt that given to schedular
 

@@ -24,17 +24,19 @@ export function ChatPanel() {
                             <text fg={theme.text}>{message.content}</text>
                         </box>
                     )}
-
                 </box>
             ))}
-            {
-                agentResponse && (
-                    <box padding={1} marginLeft={3} flexDirection="row" gap={1}>
-                        <AnimatedIcon frames={["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]} color={theme.muted}/>
+            {agentResponse && (
+                <box padding={1} marginLeft={3} flexDirection="column" gap={1}>
+                    <box flexDirection="row" gap={1}>
+                        <AnimatedIcon frames={["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]} color={theme.muted} />
+                        <text fg={theme.muted}>Working...</text>
+                    </box>
+                    <box>
                         <text fg={theme.text}>{agentResponse}</text>
                     </box>
-                )
-            }
+                </box>
+            )}
         </scrollbox>
     );
 }
