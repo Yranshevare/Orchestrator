@@ -5,7 +5,6 @@ import AgentRunner from "../Scheduler/AgentRunner";
 import inject from "../contextEngine/inject";
 import getContext from "../contextEngine/retrieve";
 import { scheduleAgent } from "../Scheduler/scheduler";
-import { eventOptions, events } from "../util/event";
 
 type Message = {
     role: "user" | "assistant";

@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { usePromptContext } from "../Providers/PromptProvider";
 import { theme } from "../theme";
 import { AnimatedIcon } from "./AnimatedIcon";
-import { eventOptions, events } from "../util/event";
 
 export function ChatPanel() {
     const { messages, agentResponse, status } = usePromptContext();
