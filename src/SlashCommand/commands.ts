@@ -6,18 +6,27 @@ import ModelCommand from "./model";
 import type { commandType, handler } from "../Types/slashCommand";
 import UpdateAgentCommand from "./updateAgent";
 import providerCommand from "./provider";
+import ToggleOrchestratorCommand from "./toggleOrchestrator";
 
 const isDev = process.env.RUNTIME === "dev";
 
-const commandList: commandType[] = [ExitCommand, ModelCommand, AddAgentCommand, UpdateAgentCommand, AgentCommand, DeleteAgentCommand, providerCommand]
+const commandList: commandType[] = [
+    ExitCommand,
+    ModelCommand,
+    AddAgentCommand,
+    UpdateAgentCommand,
+    AgentCommand,
+    DeleteAgentCommand,
+    providerCommand,
+    ToggleOrchestratorCommand,
+];
 
 const commands: commandType[] = [];
 
 if (isDev) {
     commands.push(...commandList);
-}else{
-    commands.push(...commandList.filter(cmd => !cmd.isDev));
+} else {
+    commands.push(...commandList.filter((cmd) => !cmd.isDev));
 }
-
 
 export default commands;

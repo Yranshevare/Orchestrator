@@ -16,13 +16,14 @@ type AppContextType = {
     messages: Message[];
     handleSubmit: (input: string) => void;
     agentResponse: string | null;
+    status: string | null;
 };
 
 const AppContext = createContext<AppContextType | null>(null);
 
 export default function PromptContext({ children }: { children: React.ReactNode }) {
     const [messages, setMessages] = useState<Message[]>([]);
-    // const [status, setStatus] = useState<string | null>(null);
+    const [status, setStatus] = useState<string | null>(null);
     const [agentResponse, setAgentResponse] = useState<string | null>(null);
 
     const { selectedAgent, agents } = useAgentContext();
@@ -116,20 +117,18 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             return;
         }
 
-        // setAgentResponse(`gathering context...`);
-        events.emit(eventOptions.Status, `gathering context`);
+        setStatus(`gathering context`);
 
 
         const res = await getContext(trimmedPrompt);
         if (!res.agent) {
             setMessages((prev) => [...prev, { role: "assistant", content: `Direct answer:\n${res.message}` }]);
             setAgentResponse(null);
-            events.emit(eventOptions.Status, null);
+            setStatus(null);
             return;
         }
 
-        // setAgentResponse(`update query to: (${res.message})`);
-        events.emit(eventOptions.Status, `${res.message}`);
+        setStatus(`${res.message}`);
 
         const agentState = {
             userPrompt: `user prompt: ${res.message}\navailable agent:${JSON.stringify(agents.map((agent) => ({ name: agent.name, capability: agent.when })))}`,
@@ -139,7 +138,6 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             output: [],
             context: "",
         };
-        // await scheduleAgent.invoke(agentState);
 
         let output = "";
 
@@ -157,9 +155,8 @@ export default function PromptContext({ children }: { children: React.ReactNode 
                 //@ts-ignore
                 chunk.scheduleNode.executionStep.forEach((job: { task: string; agent: string }) => {
                     str += job.agent + ": " + job.task + "\n\n";
-                    // setAgentResponse(job.agent + ": " + job.task);
                 });
-                events.emit(eventOptions.Status, `Agents are Working`);
+                setStatus(`Agents are Working`);
                 setAgentResponse(str);
             }
             //@ts-ignore
@@ -168,9 +165,8 @@ export default function PromptContext({ children }: { children: React.ReactNode 
                 //@ts-ignore
                 chunk.agentRunner.output.forEach((job: string) => {
                     str += job + "\n\n";
-                    // setAgentResponse(job.agent + ": " + job.task);
                 });
-                events.emit(eventOptions.Status, `Thinking`);
+                setStatus(`Thinking`);
                 setAgentResponse(str);
             }
 
@@ -182,7 +178,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
             //@ts-ignore
             if (chunk.summaryNode?.executionSummary) {
-                events.emit(eventOptions.Status, `Still working on it`);
+                setStatus(`Still working on it`);
                 //@ts-ignore
                 output = chunk.summaryNode.executionSummary;
             }
@@ -198,17 +194,13 @@ export default function PromptContext({ children }: { children: React.ReactNode 
         //     // setAgentResponse(output);
         // }
 
-        // setAgentResponse("saving the context...");
+        setStatus(`saving the context`);
 
         // await inject(output, settings.model, trimmedPrompt);
 
-        events.emit(eventOptions.Status, `saving the context`);
+        await new Promise((resolve) => setTimeout(resolve, 10000)); // simulating the inject execution
 
-        await new Promise((resolve) => setTimeout(resolve, 10000)); // this will be agent call
-
-        // setMessages((prev) => [...prev, { role: "assistant", content: res.message }]);   // log the prompt that given to schedular
-
-        events.emit(eventOptions.Status, null);
+        setStatus(null);
 
         setMessages((prev) => [...prev, { role: "assistant", content: output }]);        // log the agent output
         setAgentResponse(null);
@@ -220,8 +212,9 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             messages,
             handleSubmit,
             agentResponse,
+            status
         }),
-        [messages, handleSubmit, agentResponse]
+        [messages, handleSubmit, agentResponse, status]
     );
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
