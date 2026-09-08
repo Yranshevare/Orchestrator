@@ -15,6 +15,7 @@ const graphState = new StateSchema({
     goalComplete: z.boolean().describe("Indicates whether the overall goal has been completed."),
     output: z.array(z.string()).describe("The output or result of the executed tasks."),
     executionSummary: z.string().describe("A summary of the tasks executed so far and their outcomes."),
+    context: z.string().describe("complete context for agent"),
 });
 
 const graph = new StateGraph(graphState);
@@ -47,6 +48,7 @@ const scheduleNode: GraphNode<typeof graphState> = async (state) => {
     return {
         executionStep: output.job,
         goalComplete: output.goalComplete,
+        context: state.context,
     };
 };
 
@@ -55,9 +57,12 @@ graph.addNode("scheduleNode", scheduleNode);
 const agentRunner: GraphNode<typeof graphState> = async (state) => {
     // console.log("executing the task...");
 
+    let newContext = state.context;
+
     const output: string[] = await Promise.all(
         state.executionStep.map(async (job) => {
             const res = await dummyAgentRunner(job.task);
+            newContext += `task: ${job.task}\n\nresponse: ${res}`;
             return String(res);
         })
     );
@@ -65,6 +70,7 @@ const agentRunner: GraphNode<typeof graphState> = async (state) => {
     // console.log("complete tasks", output.length);
     return {
         output: output,
+        context: newContext,
     };
 };
 

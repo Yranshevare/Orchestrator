@@ -1,9 +1,16 @@
+import { useState } from "react";
 import { usePromptContext } from "../Providers/PromptProvider";
 import { theme } from "../theme";
 import { AnimatedIcon } from "./AnimatedIcon";
+import { eventOptions, events } from "../util/event";
 
 export function ChatPanel() {
     const { messages, agentResponse } = usePromptContext();
+    const [status, setStatus] = useState<null | string>(null);
+
+    events.on(eventOptions.Status, (str) => {
+        setStatus(str);
+    });
 
     if (messages.length === 0) return Logo();
 
@@ -26,15 +33,17 @@ export function ChatPanel() {
                     )}
                 </box>
             ))}
-            {agentResponse && (
+            {status && (
                 <box padding={1} marginLeft={3} flexDirection="column" gap={1}>
                     <box flexDirection="row" gap={1}>
                         <AnimatedIcon frames={["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]} color={theme.muted} />
-                        <text fg={theme.muted}>Working...</text>
+                        <text fg={theme.muted}>{status}...</text>
                     </box>
-                    <box>
-                        <text fg={theme.text}>{agentResponse}</text>
-                    </box>
+                    {agentResponse && (
+                        <box>
+                            <text fg={theme.text}>{agentResponse}</text>
+                        </box>
+                    )}
                 </box>
             )}
         </scrollbox>
