@@ -3,6 +3,7 @@ import z from "zod";
 import { scheduleAgentSystemMessage, summaryAgentSystemMessage } from "./prompts";
 import dummyAgentRunner from "./dummyAgentRunner";
 import LoadModel from "./LLM";
+import parseModelJSON from "../handler/parseModelJSON";
 
 const jobState = z.object({
     task: z.string().describe("The specific task that needs to be executed by the agent."),
@@ -34,7 +35,8 @@ const scheduleNode: GraphNode<typeof graphState> = async (state) => {
 
     const response = await model.invoke([scheduleAgentSystemMessage, prompt]);
 
-    const output = JSON.parse(response.content.toString());
+    const output = parseModelJSON(response.content.toString());
+    // const output = JSON.parse(response.content.toString());
 
     let str = "";
     output.job.forEach((job: { task: string; agent: string }) => {

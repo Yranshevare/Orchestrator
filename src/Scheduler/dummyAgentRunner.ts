@@ -1,4 +1,4 @@
-import { SystemMessage } from "langchain";
+import { HumanMessage, SystemMessage } from "langchain";
 import LoadModel from "./LLM";
 
 const systemPrompt = new SystemMessage(`
@@ -22,7 +22,7 @@ export default async function dummyAgentRunner(prompt: string) {
         throw new Error("Model not found");
     }
 
-    const response = await model.invoke([systemPrompt, new SystemMessage(`Assigned coding task:\n${prompt}`)]);
+    const response = await model.invoke([systemPrompt, new HumanMessage(`Assigned coding task:\n${prompt}`)]);
 
     return response.content;
 }
