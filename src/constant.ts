@@ -4,12 +4,15 @@ import path from "path";
 export const GLOBAL_DIR = path.join(os.homedir(), ".orchestrator");
 export const SETTINGS_PATH = path.join(GLOBAL_DIR, "settings.json");
 
-export let PROJECT_DIR: string;
+let PROJECT_DIR: string;
+let WORKING_DIR: string;
 
 if(process.env.RUNTIME === "dev") {
     PROJECT_DIR = path.join(process.cwd(), "/demo/.orchestrator");
+    WORKING_DIR = path.join(process.cwd(), "/demo");
 }else{
     PROJECT_DIR = path.join(process.cwd(), ".orchestrator");
+    WORKING_DIR = process.cwd();
 }
 
 export const PROJECT_CONFIG = path.join(PROJECT_DIR, "config.json");
@@ -28,3 +31,5 @@ export const files = {
 }
 
 export const SESSION_SIZE = 5;
+
+export { PROJECT_DIR, WORKING_DIR };

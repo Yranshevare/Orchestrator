@@ -1,5 +1,5 @@
 {
-  "name": "my-opentui-project",
+  "name": "orchestrator",
   "module": "src/index.tsx",
   "type": "module",
   "private": true,

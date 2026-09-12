@@ -2,6 +2,7 @@ import { ConsolePosition, createCliRenderer } from "@opentui/core";
 import { createRoot } from "@opentui/react";
 import { AppProvider } from "./Providers/AppContext";
 import App from "./App";
+import { PROJECT_DIR, WORKING_DIR } from "./constant";
 
 const isDev = process.env.RUNTIME === "dev";
 
@@ -20,10 +21,12 @@ const renderer = await createCliRenderer(
 if (isDev) {
     renderer.keyInput.on("keypress", (key) => {
         if (key.ctrl && key.name === "t") {
-            renderer.console.toggle();
         }
     });
 }
+renderer.console.toggle();
+
+console.log(PROJECT_DIR, WORKING_DIR)
 
 createRoot(renderer).render(
     <AppProvider>

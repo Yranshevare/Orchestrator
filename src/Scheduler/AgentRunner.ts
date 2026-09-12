@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { PROJECT_DIR } from "../constant";
+import { PROJECT_DIR, WORKING_DIR } from "../constant";
 
 
 
@@ -12,7 +12,7 @@ export default async function* AgentRunner({ agent, task }: { agent: { name: str
 
         const child = await spawn(command, [...args], {
             stdio: ["pipe", "pipe", "pipe"],
-            cwd: PROJECT_DIR
+            cwd: WORKING_DIR,
         });
 
         child.stdin.write(task + "\n");

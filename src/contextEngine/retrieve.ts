@@ -38,5 +38,3 @@ const humanMessage = new PromptTemplate({
     template: `task: {task}\nsummary: {summary}`,
     inputVariables: ["task", "summary"],
 });
-
-
