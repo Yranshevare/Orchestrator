@@ -21,12 +21,11 @@ const renderer = await createCliRenderer(
 if (isDev) {
     renderer.keyInput.on("keypress", (key) => {
         if (key.ctrl && key.name === "t") {
+            renderer.console.toggle();
         }
     });
 }
-renderer.console.toggle();
 
-console.log(PROJECT_DIR, WORKING_DIR)
 
 createRoot(renderer).render(
     <AppProvider>
