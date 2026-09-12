@@ -26,7 +26,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
     const [agentResponse, setAgentResponse] = useState<string | null>(null);
 
     const { selectedAgent, agents } = useAgentContext();
-    const { commands, refreshSettings, settings } = useSettingsContext();
+    const { commands, refreshSettings, settings, orchestrationMode } = useSettingsContext();
     // const { settings } = useSettingsContext();
 
     // run the respective handler for each command
@@ -118,7 +118,6 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         setStatus(`gathering context`);
 
-
         const res = await getContext(trimmedPrompt);
         if (!res.agent) {
             setMessages((prev) => [...prev, { role: "assistant", content: `Direct answer:\n${res.message}` }]);
@@ -129,79 +128,85 @@ export default function PromptContext({ children }: { children: React.ReactNode 
 
         setStatus(`${res.message}`);
 
-        const agentState = {
-            userPrompt: `user prompt: ${res.message}\navailable agent:${JSON.stringify(agents.map((agent) => ({ name: agent.name, capability: agent.when })))}`,
-            executionStep: [],
-            goalComplete: false,
-            executionSummary: "",
-            output: [],
-            context: "",
-        };
-
         let output = "";
 
-        for await (const chunk of await scheduleAgent.stream(agentState)) {
-            // console.log(chunk);
-            //@ts-ignore
-            if (chunk.scheduleNode?.goalComplete) {
-                 //@ts-ignore
-                console.log(chunk.scheduleNode.context);
-                break;
-            }
-            //@ts-ignore
-            if (chunk.scheduleNode?.executionStep.length > 0) {
-                let str = "";
-                //@ts-ignore
-                chunk.scheduleNode.executionStep.forEach((job: { task: string; agent: string }) => {
-                    str += job.agent + ": " + job.task + "\n\n";
-                });
-                setStatus(`Agents are Working`);
-                setAgentResponse(str);
-            }
-            //@ts-ignore
-            if (chunk.agentRunner?.output.length > 0) {
-                let str = "";
-                //@ts-ignore
-                chunk.agentRunner.output.forEach((job: string) => {
-                    str += job + "\n\n";
-                });
-                setStatus(`Thinking`);
-                setAgentResponse(str);
-            }
+        if (orchestrationMode) {
+            let context: string = "";
 
-            //@ts-ignore
-            if (chunk.updateExecutionSummary?.executionSummary) {
-                //@ts-ignore
-                output = chunk.updateExecutionSummary.executionSummary;
-            }
+            const agentState = {
+                userPrompt: `user prompt: ${res.message}\navailable agent:${JSON.stringify(agents.map((agent) => ({ name: agent.name, capability: agent.when })))}`,
+                executionStep: [],
+                goalComplete: false,
+                executionSummary: "",
+                output: [],
+                context: "",
+            };
 
-            //@ts-ignore
-            if (chunk.summaryNode?.executionSummary) {
-                setStatus(`Still working on it`);
+            for await (const chunk of await scheduleAgent.stream(agentState)) {
+                // console.log(chunk);
                 //@ts-ignore
-                output = chunk.summaryNode.executionSummary;
+                if (chunk.scheduleNode?.goalComplete) {
+                    //@ts-ignore
+                    context = chunk.scheduleNode.context;
+                    // console.log(chunk.scheduleNode.context);
+
+                    break;
+                }
+                //@ts-ignore
+                if (chunk.scheduleNode?.executionStep.length > 0) {
+                    let str = "";
+                    //@ts-ignore
+                    chunk.scheduleNode.executionStep.forEach((job: { task: string; agent: string }) => {
+                        str += job.agent + ": " + job.task + "\n\n";
+                    });
+                    setStatus(`Agents are Working`);
+                    setAgentResponse(str);
+                }
+                //@ts-ignore
+                if (chunk.agentRunner?.output.length > 0) {
+                    let str = "";
+                    //@ts-ignore
+                    chunk.agentRunner.output.forEach((job: string) => {
+                        str += job + "\n\n";
+                    });
+                    setStatus(`Thinking`);
+                    setAgentResponse(str);
+                }
+
+                //@ts-ignore
+                if (chunk.updateExecutionSummary?.executionSummary) {
+                    //@ts-ignore
+                    output = chunk.updateExecutionSummary.executionSummary;
+                }
+
+                //@ts-ignore
+                if (chunk.summaryNode?.executionSummary) {
+                    setStatus(`Still working on it`);
+                    //@ts-ignore
+                    output = chunk.summaryNode.executionSummary;
+                }
             }
+            await inject(context, settings.model, trimmedPrompt, output);
+        } else {
+            setStatus(`Agent is Working`);
+            setAgentResponse(`${agents[selectedAgent]}: ${res.message}`);
+
+            for await (const chunk of AgentRunner({
+                agent: agents[selectedAgent],
+                task: res.message,
+            })) {
+                output += chunk;
+            }
+            setStatus(`saving the context`);
+
+            await inject(output, settings.model, trimmedPrompt);
         }
 
-        // let output = "";
-
-        // for await (const chunk of AgentRunner({
-        //     agent: agents[selectedAgent],
-        //     task: res.message,
-        // })) {
-        //     output += chunk;
-        //     // setAgentResponse(output);
-        // }
-
-        setStatus(`saving the context`);
-
-        // await inject(output, settings.model, trimmedPrompt);
-
-        await new Promise((resolve) => setTimeout(resolve, 10000)); // simulating the inject execution
+        // await new Promise((resolve) => setTimeout(resolve, 10000)); // simulating the inject execution
 
         setStatus(null);
 
-        setMessages((prev) => [...prev, { role: "assistant", content: output }]);        // log the agent output
+        setMessages((prev) => [...prev, { role: "assistant", content: output }]); // log the agent output
         setAgentResponse(null);
         return;
     };
@@ -211,7 +216,7 @@ export default function PromptContext({ children }: { children: React.ReactNode 
             messages,
             handleSubmit,
             agentResponse,
-            status
+            status,
         }),
         [messages, handleSubmit, agentResponse, status]
     );

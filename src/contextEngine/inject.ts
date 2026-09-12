@@ -7,23 +7,36 @@ import { HumanMessage } from "langchain";
 import { v4 as uuidv4 } from "uuid";
 import { Database } from "bun:sqlite";
 
-export default async function inject(input: string, settings: { name: string; provider: string; api_key: string }, task: string) {
+export default async function inject(
+    input: string,
+    settings: { name: string; provider: string; api_key: string },
+    task: string,
+    summary: string = ""
+) {
     try {
-        const model = LLM(settings);    // fetching your setting and setting up your LLM
+        const model = LLM(settings); // fetching your setting and setting up your LLM
 
         if (!model) {
             throw new Error("Model not found");
         }
 
-        const agent = injectAgent(model);   // converting your LLM to agent
+        let inputSummary = summary;
 
-        const message = [injectAgentSystemMessage, new HumanMessage(input)];
+        if (inputSummary === "") {
+            const agent = injectAgent(model); // converting your LLM to agent
 
-        const response = await agent.invoke(message);
+            const message = [injectAgentSystemMessage, new HumanMessage(input)];
+
+            const response = await agent.invoke(message);
+
+            inputSummary = response.content;
+        }
+
+        // console.log("summary = ",inputSummary, "context = ", input);
 
         const id = uuidv4();
 
-        await Promise.all([saveSummary(id, response.content, task), saveContext(id, input, task)]);
+        await Promise.all([saveSummary(id, inputSummary, task), saveContext(id, input, task)]);
     } catch (error) {
         console.error(error);
     }

@@ -20,6 +20,7 @@ type SettingsContextType = {
     setIsModelOpen: React.Dispatch<React.SetStateAction<boolean>>;
     saveModel: (model: string) => void;
     saveProvider: (provider: string, apiKey: string) => void;
+    orchestrationMode: boolean;
 };
 
 // const settingList = ["/model", "/agents", "/agent add", "/agent update", "/agent delete", "/exit"];
@@ -40,6 +41,7 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
     const [filteredCommand, setFilteredCommand] = useState<{ command: string; description: string }[]>([]);
     const [isModelOpen, setIsModelOpen] = useState(false);
     const [isProviderOpen, setIsProviderOpen] = useState(false);
+    const [orchestrationMode, setOrchestrationMode] = useState(false);
 
     events.on(eventOptions.LLMModel, () => {
         setIsModelOpen(true);
@@ -83,6 +85,7 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
                 agents: parsedSettings.agents || DEFAULT_SETTINGS.agents,
             };
             setSettings(settingObj);
+            setOrchestrationMode(parsedSettings.orchestrator === undefined ? true : parsedSettings.orchestrator);
             setIsReady(true);
         } else {
             setSettings(DEFAULT_SETTINGS);
@@ -140,9 +143,10 @@ export default function SettingsProvider({ children }: { children: React.ReactNo
             setIsModelOpen,
             saveModel,
             isProviderOpen,
-            saveProvider
+            saveProvider,
+            orchestrationMode
         }),
-        [settings, isReady, filteredCommand, isModelOpen, isProviderOpen]
+        [settings, isReady, filteredCommand, isModelOpen, isProviderOpen, orchestrationMode]
     );
 
     return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

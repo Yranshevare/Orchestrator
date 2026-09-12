@@ -14,4 +14,5 @@ export  type model = {
 export type SettingsState = {
     model: model;
     agents: Agents;
+    orchestrator?: boolean;
 };
