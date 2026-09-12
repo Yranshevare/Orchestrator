@@ -4,6 +4,8 @@ import { scheduleAgentSystemMessage, summaryAgentSystemMessage } from "./prompts
 import dummyAgentRunner from "./dummyAgentRunner";
 import LoadModel from "./LLM";
 import parseModelJSON from "../handler/parseModelJSON";
+import AgentRunner from "./AgentRunner";
+import { read } from "../util/read";
 
 const jobState = z.object({
     task: z.string().describe("The specific task that needs to be executed by the agent."),
@@ -18,6 +20,14 @@ const graphState = new StateSchema({
     executionSummary: z.string().describe("A summary of the tasks executed so far and their outcomes."),
     context: z.string().describe("complete context for agent"),
 });
+
+const settingsString = await read();
+
+if (settingsString.error) {
+    throw Error(settingsString.error);
+}
+
+const settings = JSON.parse(settingsString.data as string);
 
 const graph = new StateGraph(graphState);
 
@@ -63,7 +73,16 @@ const agentRunner: GraphNode<typeof graphState> = async (state) => {
 
     const output: string[] = await Promise.all(
         state.executionStep.map(async (job) => {
-            const res = await dummyAgentRunner(job.task);
+            const agent = settings.agents[job.agent];
+            console.log(agent);
+            let res = "";
+            // res = await dummyAgentRunner(job.task);
+            for await (const chunk of AgentRunner({
+                agent: { name: job.agent, cmd: agent.cmd, when: agent.when },
+                task: job.task,
+            })) {
+                res += chunk;
+            }
             newContext += `task: ${job.task}\n\nresponse: ${res}`;
             return String(res);
         })
