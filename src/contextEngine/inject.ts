@@ -14,7 +14,7 @@ export default async function inject(
     summary: string = ""
 ) {
     try {
-        const model = LLM(settings); // fetching your setting and setting up your LLM
+        const model = LLM(); // fetching your setting and setting up your LLM
 
         if (!model) {
             throw new Error("Model not found");

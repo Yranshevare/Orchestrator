@@ -76,18 +76,7 @@ const toolNode = new ToolNode([retrieveViaID]);
 // adding tool node to graph
 graph.addNode("toolNode", toolNode);
 
-// configuring model
-const settingsString = await read();
-
-
-if (!settingsString.success) {
-    throw Error(settingsString.error);
-}
-
-const settings = JSON.parse(settingsString.data as string);
-
-
-const model = LLM(settings.model);
+const model = await LLM();
 
 if (!model) {
     throw Error("Model not found");
