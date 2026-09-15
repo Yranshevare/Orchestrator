@@ -89,7 +89,12 @@ orc
 
 Orchestrator will now open in the current workspace.
 
-> Note: When Orchestrator is launched using orc from another workspace, it always connects to the production environment, even if that workspace contains a `.env` file. The `.env` configuration from the external workspace is not used.
+> **Note:** When Orchestrator is launched using `orc` from another workspace, it checks for the `.env` file in the **current workspace**.
+>
+> * If the workspace contains `.env` with `RUNTIME="dev"`, Orchestrator connects to the **development environment**.
+> * If the workspace does not contain a `.env` file, Orchestrator uses the **production environment** by default.
+> * The `.env` file in the **Orchestrator project directory** is ignored when running `orc` from another workspace.
+
 
 ---
 
