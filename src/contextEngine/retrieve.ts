@@ -2,7 +2,7 @@ import { HumanMessage } from "langchain";
 import { COMPRESSED_JSON } from "../constant";
 import { read } from "../util/read";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { retrieveAgent } from "./agents/retrieve";
+import { retrieveAgent, retrieveAgentSystemMessage } from "./agents/retrieve";
 import parseModelJSON from "../handler/parseModelJSON";
 
 export default async function getContext(task: string) {
@@ -14,7 +14,7 @@ export default async function getContext(task: string) {
 
     const agentPrompt = await humanMessage.format({ task, summary: data.data });
 
-    const messages = [new HumanMessage(agentPrompt)];
+    const messages = [retrieveAgentSystemMessage, new HumanMessage(agentPrompt)];
 
     // console.log("fetching context...");
     const res = await retrieveAgent.invoke({ messages });
