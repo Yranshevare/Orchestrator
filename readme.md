@@ -70,8 +70,26 @@ This gives you access to:
 | Feature | Description |
 |---------|-------------|
 | Terminal Console (Ctrl + t) | Enables console output for debugging (`console.log`, etc.). |
-| Experimental Commands | Access to commands currently under development. |
+| Experimental features | Access to features currently under development. |
+| `./demo` Folder| When you ask the agent to perform a task, it operates inside the `./demo` folder. Make sure this folder exists at the root of the project. |
 
+
+### To Run Orchestrator in Other Workspaces
+
+To use Orchestrator in different workspaces, follow these steps:
+
+1. Copy the path of the `bin` folder located at the root of the project.
+2. Add the copied path to your system's **Environment Variables**.
+3. Open a terminal in any workspace where you want to run Orchestrator.
+4. Run the following command:
+
+```bash
+orc
+```
+
+Orchestrator will now open in the current workspace.
+
+> Note: When Orchestrator is launched using orc from another workspace, it always connects to the production environment, even if that workspace contains a `.env` file. The `.env` configuration from the external workspace is not used.
 
 ---
 
@@ -104,7 +122,7 @@ Type `/` in input box to access the list available commands
 
 # overall architecture
 
-<img src="./img/overall-archtecture.png" style="width:500px"/>
+<img src="./img/overall-architecture.png" style="width:500px"/>
 
 ---
 # RAG architecture (Phase 2)
