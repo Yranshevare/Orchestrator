@@ -110,8 +110,8 @@ Type `/` in input box to access the list available commands
 |  5  | `/agent-update <name> --key value`                     | Update an existing agent's configuration. | `/agent-update claude --name claude_with_ollama`                      |
 |  6  | `/agent-delete <name>`                                 | Delete a registered agent.                | `/agent-delete claude`                                                |
 | 7 | `/provider` | configure LLM provider | `/provider` |
-| 8 | `/model` | switch between the LLMs | `/provider` |
-| 9 | `/toggle-orchestrator` | switch between auto/manual orchestrator | `/provider` |
+| 8 | `/model` | switch between the LLMs | `/model` |
+| 9 | `/toggle-orchestrator` | switch between auto/manual orchestrator | `/toggle-orchestrator` |
 
 ---
 
